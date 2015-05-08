@@ -15,7 +15,6 @@ import org.bimserver.tests.utils.TestWithEmbeddedServer;
 import org.junit.Test;
 
 public class RemoveReferenceList extends TestWithEmbeddedServer {
-
 	
 	// This test makes no sense, since getContainedInStructure is a Set (unordered)
 	@Test
@@ -58,11 +57,15 @@ public class RemoveReferenceList extends TestWithEmbeddedServer {
 				if (ifcFurnishingElement.getContainedInStructure().size() != 3) {
 					fail("Size should be 3, is " + ifcFurnishingElement.getContainedInStructure().size());
 				}
-				assertTrue(ifcFurnishingElement.getContainedInStructure().get(0).getName() + " should be link1", ifcFurnishingElement.getContainedInStructure().get(0).getName().equals("link1"));
-				assertTrue(ifcFurnishingElement.getContainedInStructure().get(1).getName() + " should be link2", ifcFurnishingElement.getContainedInStructure().get(1).getName().equals("link2"));
-				assertTrue(ifcFurnishingElement.getContainedInStructure().get(2).getName() + " should be link3", ifcFurnishingElement.getContainedInStructure().get(2).getName().equals("link3"));
 				// Remove the middle one
-				ifcFurnishingElement.getContainedInStructure().remove(1);
+				IfcRelContainedInSpatialStructure middleOne = null;
+				for (IfcRelContainedInSpatialStructure rel : ifcFurnishingElement.getContainedInStructure()) {
+					if (rel.getName().equals("link2")) {
+						middleOne = rel;
+						break;
+					}
+				}
+				ifcFurnishingElement.getContainedInStructure().remove(middleOne);
 			}
 			
 			model.commit("removed middle link");

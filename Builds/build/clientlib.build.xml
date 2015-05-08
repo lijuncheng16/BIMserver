@@ -16,6 +16,9 @@
 			<fileset file="builds/pluginlibs/bimserver-${version}-ifcplugins.jar"/>
 		</copy>
 		<copy todir="builds/BuildLib/dep" flatten="true">
+			<fileset file="../../Shared/lib/other/jackson-annotations-2.5.0.jar"/>
+			<fileset file="../../Shared/lib/other/jackson-core-2.5.1.jar"/>
+			<fileset file="../../Shared/lib/other/jackson-databind-2.5.1.jar"/>
 			<fileset file="../../Shared/lib/commons/commons-logging-1.1.1.jar"/>
 			<fileset file="../../Shared/lib/commons/commons-io-1.4.jar"/>
 			<fileset file="../../Shared/lib/commons/commons-codec-1.7.jar"/>
@@ -26,10 +29,11 @@
 			<fileset file="../../BimServer/lib/cxf/wsdl4j-1.6.2.jar"/>
 			<fileset file="../../BimServer/lib/cxf/xmlschema-core-2.0.3.jar"/>
 			<fileset file="../../Shared/lib/other/gson-2.2.4.jar"/>
-			<fileset file="../../Shared/lib/other/guava-16.0.1.jar"/>
-			<fileset file="../../BimServer/lib/cxf/httpclient-4.2.1.jar"/>
-			<fileset file="../../BimServer/lib/cxf/httpcore-4.2.2.jar"/>
-			<fileset file="../../BimServer/lib/cxf/httpmime-4.2.2.jar"/>
+			<fileset file="../../Shared/lib/other/guava-18.0.1.jar"/>
+			<fileset file="../../Shared/lib/httpclient/httpclient-4.3.6.jar"/>
+			<fileset file="../../Shared/lib/httpclient/httpclient-cache-4.3.2.jar"/>
+			<fileset file="../../Shared/lib/httpclient/httpcore-4.3.3.jar"/>
+			<fileset file="../../Shared/lib/httpclient/httpmime-4.3.2.jar"/>
 			<fileset file="../../BimServer/lib/cxf/jettison-1.3.3.jar"/>
 			<fileset file="../../Shared/lib/other/javassist.jar"/>
 			<fileset file="../../Shared/lib/other/mail.jar"/>

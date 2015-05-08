@@ -151,7 +151,8 @@ public class ClientIfcModel extends IfcModel {
 				if (getModelState() != ModelState.LOADING) {
 					try {
 						if (eFeature instanceof EReference) {
-							bimServerClient.getBimsie1LowLevelInterface().removeReference(getTransactionId(), idEObject.getOid(), eFeature.getName(), notification.getPosition());
+							IdEObject oldValue = (IdEObject) notification.getOldValue();
+							bimServerClient.getBimsie1LowLevelInterface().removeReferenceByOid(getTransactionId(), idEObject.getOid(), eFeature.getName(), oldValue.getOid());
 						} else {
 							throw new RuntimeException("Unimplemented " + eFeature.getEType().getName() + " " + notification.getNewValue());
 						}
@@ -612,7 +613,7 @@ public class ClientIfcModel extends IfcModel {
 				return c++;
 			}
 		});
-		SharedJsonSerializer sharedJsonSerializer = new SharedJsonSerializer(this, getBimServerClient().getServicesMap());
+		SharedJsonSerializer sharedJsonSerializer = new SharedJsonSerializer(this, getBimServerClient().getServicesMap(), false);
 		SDeserializerPluginConfiguration deserializer = bimServerClient.getBimsie1ServiceInterface().getSuggestedDeserializerForExtension("json", poid);
 		bimServerClient.checkin(poid, comment, deserializer.getOid(), false, true, -1, "test", new SerializerInputstream(sharedJsonSerializer));
 	}
