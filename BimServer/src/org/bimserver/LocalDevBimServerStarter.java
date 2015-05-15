@@ -41,7 +41,7 @@ public class LocalDevBimServerStarter {
 	private BimServer bimServer;
 	
 	public static void main(String[] args) {
-		new LocalDevBimServerStarter().start(1, "localhost", 8080, 8085, new OptionsParser(args).getPluginDirectories());
+		new LocalDevBimServerStarter().start(1, "localhost", 8051, 8085, new OptionsParser(args).getPluginDirectories());
 //		new LocalDevBimServerStarter().start(2, "localhost", 8081, 8086, gitDir);
 	}
 
