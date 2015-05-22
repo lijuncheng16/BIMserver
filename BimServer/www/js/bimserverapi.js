@@ -171,6 +171,9 @@ function BimServerApi(baseUrl, notifier) {
 	};
 
 	this.login = function(username, password, rememberme, callback, errorCallback, options) {
+		if (options == null) {
+			options = {};
+		}
 		var request = {
 			username: username,
 			password: password
@@ -184,10 +187,12 @@ function BimServerApi(baseUrl, notifier) {
 				$.cookie("autologin" + window.document.location.port, othis.token, { path: "/"});
 				$.cookie("address" + window.document.location.port, othis.baseUrl, { path: "/"});
 			}
-			othis.notifier.setInfo("Login successful", 2000);
+			if (options.done != false) {
+				othis.notifier.setInfo("Login successful", 2000);
+			}
 			othis.resolveUser();
 			othis.server.connect(callback);
-		}, errorCallback);
+		}, errorCallback, options.busy == false ? false : true, options.done == false ? false : true, options.error == false ? false : true);
 	};
 
 	this.downloadViaWebsocket = function(msg){
@@ -1700,7 +1705,6 @@ function Promise(counter) {
 			o.counter = 0;
 		}
 		o.counter--;
-		console.log(o.counter);
 		if (o.counter == 0) {
 			o.done = true;
 			o.fire();
