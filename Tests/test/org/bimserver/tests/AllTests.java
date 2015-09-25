@@ -97,7 +97,7 @@ public class AllTests {
 		bimServer = new BimServer(config);
 		try {
 			// CHANGE THESE TO MATCH YOUR CONFIGURATION
-			File[] pluginDirectories = new File[]{new File("E:\\Git\\BIMserverMaster2")};
+			File[] pluginDirectories = new File[]{new File("D:\\Git\\BIMserverMaster")};
 			
 			// Load plugins
 			LocalDevPluginLoader.loadPlugins(bimServer.getPluginManager(), pluginDirectories);
@@ -113,6 +113,7 @@ public class AllTests {
 			
 			client.disconnect();
 		} catch (Exception e) {
+			e.printStackTrace();
 			fail(e.getMessage());
 		}
 	}
