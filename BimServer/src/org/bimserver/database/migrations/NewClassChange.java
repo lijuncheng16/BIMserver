@@ -44,6 +44,11 @@ public class NewClassChange implements Change {
 				if (!created) {
 					throw new BimserverDatabaseException("Could not create table " + tableName);
 				}
+//				for (EStructuralFeature eStructuralFeature : eClass.getEAllStructuralFeatures()) {
+//					if (eStructuralFeature.getEAnnotation("index") != null) {
+//						database.createIndexTable(eClass, eStructuralFeature, databaseSession);
+//					}
+//				}
 			} catch (BimserverLockConflictException e) {
 				LOGGER.error("", e);
 			}

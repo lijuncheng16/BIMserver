@@ -25,9 +25,6 @@
 		<ant antfile="bimserver.build.xml" target="Build War"/>
 		<copy file="builds/bimserver-${version}.war" todir="/var/www/BIMserver/${majorversion}.${minorversion}/${version}"/>
 
-		<ant antfile="bimserver.build.xml" target="Build War Tomcat7"/>
-		<copy file="builds/bimserver-tomcat7-${version}.war" todir="/var/www/BIMserver/${majorversion}.${minorversion}/${version}"/>
-
 		<ant antfile="bimserver.build.xml" target="Build Jar"/>
 		<copy file="builds/bimserver-${version}.jar" todir="/var/www/BIMserver/${majorversion}.${minorversion}/${version}"/>
 		
@@ -46,7 +43,7 @@
 			<classpath>
 				<pathelement location="antlibs/gson-2.2.4.jar"/>
 				<pathelement location="antlibs/githubrelease.jar"/>
-				<pathelement location="antlibs/org.eclipse.egit.github.core-2.1.5.jar"/>
+				<pathelement location="antlibs/github.jar"/>
 				<pathelement location="antlibs/httpcore-4.3.1.jar"/>
 				<pathelement location="antlibs/httpclient-4.3.2.jar"/>
 				<pathelement location="antlibs/commons-logging-1.1.3.jar"/>
@@ -61,7 +58,7 @@
 			<arg value="BIMserver Release"></arg>
 			<arg value="true"></arg>
 			<arg value="true"></arg>
-			<arg value="/var/www/BIMserver/${majorversion}.${minorversion}/${version}/bimserver-${version}.jar;/var/www/BIMserver/${majorversion}.${minorversion}/${version}/bimserver-${version}.war;/var/www/BIMserver/${majorversion}.${minorversion}/${version}/bimserver-tomcat7-${version}.war;/var/www/BIMserver/${majorversion}.${minorversion}/${version}/bimserver-client-lib-${version}.zip;/var/www/BIMserver/${majorversion}.${minorversion}/${version}/bimserver-lib-${version}.zip"></arg>			
+			<arg value="/var/www/BIMserver/${majorversion}.${minorversion}/${version}/bimserver-${version}.jar;/var/www/BIMserver/${majorversion}.${minorversion}/${version}/bimserver-${version}.war;/var/www/BIMserver/${majorversion}.${minorversion}/${version}/bimserver-client-lib-${version}.zip;/var/www/BIMserver/${majorversion}.${minorversion}/${version}/bimserver-lib-${version}.zip"></arg>			
 		</java>
 	</target>
 </project>

@@ -114,7 +114,8 @@ public class JsonHandler {
 					parameters[i] = new KeyValuePair(parameter.getName(), converter.fromJson(parameter.getType(), parameter.getGenericType(),
 							parametersJson.get(parameter.getName())));
 				} else {
-					LOGGER.error("Missing parameters: " + method.getName() + " -> " + parameter.getName());
+					LOGGER.error("Missing parameter: " + method.getName() + " -> " + parameter.getName());
+					throw new UserException("Missing parameter: " + method.getName() + " -> " + parameter.getName());
 				}
 			}
 		}
@@ -123,7 +124,11 @@ public class JsonHandler {
 		String oldThreadName = Thread.currentThread().getName();
 		Thread.currentThread().setName(interfaceName + "." + methodName);
 		try {
+			Recording recording = bimServer.getMetricsRegistry().startRecording(sService, method);
+
 			Object result = method.invoke(sService.getInterfaceClass(), service, parameters);
+			
+			recording.finish();
 			
 			// When we have managed to get here, no exceptions have been thrown. We
 			// can safely assume further serialization to JSON won't fail. So now we

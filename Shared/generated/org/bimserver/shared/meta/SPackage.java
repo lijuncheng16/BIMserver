@@ -176,6 +176,9 @@ public class SPackage {
 		Class.forName("org.bimserver.interfaces.objects.SModelCheckerPluginDescriptor");
 		Class.forName("org.bimserver.interfaces.objects.SSmtpProtocol");
 		Class.forName("org.bimserver.interfaces.objects.SMessagingSerializerPluginConfiguration");
+		Class.forName("org.bimserver.interfaces.objects.SMetrics");
+		Class.forName("org.bimserver.interfaces.objects.SInterfaceMetric");
+		Class.forName("org.bimserver.interfaces.objects.SMethodMetric");
 		} catch (ClassNotFoundException e) {
 			LOGGER.error("", e);
 		}

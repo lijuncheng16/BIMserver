@@ -170,6 +170,8 @@ public class CheckinDatabaseAction extends GenericCheckinDatabaseAction {
 				ifcModel = getModel();
 			}
 
+			ifcModel.fixOidsFlat(getDatabaseSession());
+
 			if (bimServer.getServerSettingsCache().getServerSettings().isGenerateGeometryOnCheckin()) {
 				setProgress("Generating Geometry...", -1);
 				new GeometryGenerator(bimServer).generateGeometry(authorization.getUoid(), bimServer.getPluginManager(), getDatabaseSession(), ifcModel, project.getId(), concreteRevision.getId(), true, geometryCache);
@@ -186,14 +188,14 @@ public class CheckinDatabaseAction extends GenericCheckinDatabaseAction {
 			Map<EClass, Long> startOids = getDatabaseSession().getStartOids();
 			int s = 0;
 			for (EClass eClass : eClasses) {
-				if (getDatabaseSession().perRecordVersioning(eClass)) {
+				if (!DatabaseSession.perRecordVersioning(eClass)) {
 					s++;
 				}
 			}
 			ByteBuffer buffer = ByteBuffer.allocate(10 * s);
 			for (EClass eClass : eClasses) {
 				long oid = startOids.get(eClass);
-				if (getDatabaseSession().perRecordVersioning(eClass)) {
+				if (!DatabaseSession.perRecordVersioning(eClass)) {
 					buffer.putShort(getDatabaseSession().getCid(eClass));
 					buffer.putLong(oid);
 				}

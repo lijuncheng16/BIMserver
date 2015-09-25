@@ -39,7 +39,7 @@ function BimServerApi(baseUrl, notifier) {
 		SETDEFAULTMODELCOMPARE_DONE: "Default Model Compare successfully changed",
 		LOGIN_BUSY: "Trying to login",
 		CHANGEUSERTYPE_DONE: "Type of user successfully changed",
-		ADDUSER_DONE: "User successfully added",
+		ADDUSER_DONE: "User successfully added, you should receive a validation email shortly",
 		UPDATEINTERNALSERVICE_DONE: "Internal service successfully updated",
 		UPDATEMODELCOMPARE_DONE: "Model compare plugin successfully updated",
 		UPDATEMODELMERGER_DONE: "Model merger successfully updated",
@@ -71,7 +71,8 @@ function BimServerApi(baseUrl, notifier) {
 		GETPLUGINDESCRIPTOR_BUSY: "Getting plugin information",
 		GETUSERSETTINGS_BUSY: "Getting user settings",
 		GETALLQUERYENGINES_BUSY: "Getting query engines",
-		REGISTERNEWPROJECTHANDLER_BUSY: "Registering for updates on new projects"
+		REGISTERNEWPROJECTHANDLER_BUSY: "Registering for updates on new projects",
+		ADDUSER_BUSY: "Adding user..."
 	}
 
 	othis.token = null;
@@ -181,9 +182,11 @@ function BimServerApi(baseUrl, notifier) {
 		othis.call("Bimsie1AuthInterface", "login", request, function(data){
 			othis.token = data;
 			if (rememberme) {
+				// Stored cookie
 				$.cookie("autologin" + window.document.location.port, othis.token, { expires: 31, path: "/"});
 				$.cookie("address" + window.document.location.port, othis.baseUrl, { expires: 31, path: "/"});
-			} else {
+			} else if (!options.suppressSessionCookie) {
+				// Session cookie
 				$.cookie("autologin" + window.document.location.port, othis.token, { path: "/"});
 				$.cookie("address" + window.document.location.port, othis.baseUrl, { path: "/"});
 			}
@@ -672,6 +675,43 @@ function BimServerApi(baseUrl, notifier) {
 		});
 		return isa;
 	};
+
+	this.checkin = function(project, file, deserializerOid, progressListener, success, error){
+		var reader = new FileReader();
+		var xhr = new XMLHttpRequest();
+		
+		xhr.upload.addEventListener("progress",
+			function(e) {
+				if (e.lengthComputable) {
+					var percentage = Math.round((e.loaded * 100) / e.total);
+					progressListener(percentage);
+				}
+			}, false);
+
+		xhr.addEventListener("load", function(e) {
+			var result = JSON.parse(this.response);
+			
+			if (result.exception == null) {
+				success(result.checkinid);
+			} else {
+				error(result.exception);
+			}
+		}, false);
+		xhr.open("POST", Global.bimServerApi.baseUrl + "/upload");
+		reader.onload = function(evt) {
+			var formData = new FormData();
+			formData.append("token", othis.token);
+			formData.append("deserializerOid", deserializerOid);
+			formData.append("comment", file.name);
+			formData.append("merge", false);
+			formData.append("poid", project.oid);
+			formData.append("sync", false);
+			formData.append("file", file);
+			
+			xhr.send(formData);
+		};
+		reader.readAsBinaryString(file);
+	};
 	
 	this.setToken = function(token, callback, errorCallback) {
 		othis.token = token;
@@ -679,7 +719,9 @@ function BimServerApi(baseUrl, notifier) {
 			othis.user = data;
 			othis.server.connect(callback);
 		}, function(){
-			errorCallback();
+			if (errorCallBack != null) {
+				errorCallback();
+			}
 		});
 	};
 
@@ -1263,6 +1305,9 @@ function Model(bimServerApi, poid, roid, schema) {
 		if (othis.objects[object._i] != null) {
 			console.log("Warning!", object);
 		}
+		if (typeName == null) {
+			console.warn("typeName = null", object);
+		}
 		object.oid = object._i;
 		var cl = othis.getClass(typeName);
 		var wrapper = Object.create(cl);
@@ -1569,9 +1614,12 @@ function BimServerWebSocket(baseUrl, bimServerApi) {
 	this.tosend = [];
 	this.tosendAfterConnect = [];
 	this.messagesReceived = 0;
+	this.intervalId = null;
 
 	this.connect = function(callback) {
-		othis.openCallbacks.push(callback);
+		if (callback != null) {
+			othis.openCallbacks.push(callback);
+		}
 		var location = bimServerApi.baseUrl.toString().replace('http://', 'ws://').replace('https://', 'wss://') + "/stream";
 		if ("WebSocket" in window) {
 			try {
@@ -1595,6 +1643,9 @@ function BimServerWebSocket(baseUrl, bimServerApi) {
 	};
 
 	this._onopen = function() {
+		othis.intervalId = window.setInterval(function(){
+			othis.send({"hb": true});
+		}, 30 * 1000); // Send hb every 30 seconds
 		while (othis.tosendAfterConnect.length > 0 && othis._ws.readyState == 1) {
 			var messageArray = othis.tosendAfterConnect.splice(0, 1);
 			othis._sendWithoutEndPoint(messageArray[0]);
@@ -1661,6 +1712,8 @@ function BimServerWebSocket(baseUrl, bimServerApi) {
 	};
 
 	this._onclose = function(m) {
+		console.log("WebSocket closed");
+		window.clearInterval(othis.intervalId);
 		othis._ws = null;
 		othis.connected = false;
 		othis.openCallbacks = [];

@@ -156,9 +156,19 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 	public SDownloadResult getDownloadData(final Long actionId) throws ServerException, UserException {
 		LongDownloadOrCheckoutAction longAction = (LongDownloadOrCheckoutAction) getBimServer().getLongActionManager().getLongAction(actionId);
 		if (longAction != null) {
-			longAction.waitForCompletion();
-			SCheckoutResult result = longAction.getCheckoutResult();
-			return result;
+			try {
+				longAction.waitForCompletion();
+				if (longAction.getErrors().isEmpty()) {
+					SCheckoutResult result = longAction.getCheckoutResult();
+					return result;
+				} else {
+					LOGGER.error(longAction.getErrors().get(0));
+					throw new ServerException(longAction.getErrors().get(0));
+				}
+			} catch (Exception e) {
+				LOGGER.error("", e);
+				throw new ServerException(e);
+			}
 		} else {
 			throw new UserException("No data found for laid " + actionId);
 		}
@@ -686,6 +696,9 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 	
 	public SExtendedDataSchema getExtendedDataSchemaByNamespace(String nameSpace) throws UserException, ServerException {
 		// Not checking for real authentication here because a remote service should be able to use an exs
+		if (nameSpace == null) {
+			throw new UserException("NameSpace required");
+		}
 		requireAuthenticationAndRunningServer();
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {

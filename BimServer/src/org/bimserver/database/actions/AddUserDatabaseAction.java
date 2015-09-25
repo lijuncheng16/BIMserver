@@ -17,6 +17,7 @@ package org.bimserver.database.actions;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *****************************************************************************/
 
+import java.security.SecureRandom;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +57,7 @@ public class AddUserDatabaseAction extends BimDatabaseAction<User> {
 	private boolean createSystemUser = false;
 	private final BimServer bimServer;
 	private String resetUrl;
+	private static final SecureRandom secureRandom = new SecureRandom();
 
 	public AddUserDatabaseAction(BimServer bimServer, DatabaseSession databaseSession, AccessMethod accessMethod, String username, String name, UserType userType,
 			Authorization authorization, boolean selfRegistration, String resetUrl) {
@@ -116,7 +118,7 @@ public class AddUserDatabaseAction extends BimDatabaseAction<User> {
 		final User user = getDatabaseSession().create(User.class);
 		if (password != null) {
 			byte[] salt = new byte[32];
-			new java.security.SecureRandom().nextBytes(salt);
+			secureRandom.nextBytes(salt);
 			user.setPasswordHash(new Authenticator().createHash(password, salt));
 			user.setPasswordSalt(salt);
 		}
@@ -172,7 +174,7 @@ public class AddUserDatabaseAction extends BimDatabaseAction<User> {
 								context.put("name", user.getName());
 								context.put("username", user.getUsername());
 								context.put("siteaddress", serverSettings.getSiteAddress());
-								context.put("validationlink", resetUrl + "&username=" + user.getUsername() + "&uoid=" + user.getOid() + "&token=" + token + "&address=" + bimServer.getServerSettingsCache().getServerSettings().getSiteAddress());
+								context.put("validationlink", resetUrl + "&username=" + user.getUsername() + "&uoid=" + user.getOid() + "&validationtoken=" + token + "&address=" + bimServer.getServerSettingsCache().getServerSettings().getSiteAddress());
 								String subject = null;
 								if (selfRegistration) {
 									body = bimServer.getTemplateEngine().process(context, TemplateIdentifier.SELF_REGISTRATION_EMAIL_BODY);

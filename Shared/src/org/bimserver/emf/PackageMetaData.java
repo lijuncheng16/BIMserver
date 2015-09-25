@@ -170,7 +170,11 @@ public class PackageMetaData implements ObjectFactory {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public Set<EClass> getDirectSubClasses(EClass superClass) {
+		if (!directSubClasses.containsKey(superClass.getName())) {
+			return java.util.Collections.EMPTY_SET;
+		}
 		return directSubClasses.get(superClass.getName());
 	}
 	

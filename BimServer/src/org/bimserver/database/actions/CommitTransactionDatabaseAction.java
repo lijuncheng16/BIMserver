@@ -114,8 +114,10 @@ public class CommitTransactionDatabaseAction extends GenericCheckinDatabaseActio
 		PackageMetaData packageMetaData = bimServer.getMetaDataManager().getPackageMetaData(project.getSchema());
 		IfcModelInterface ifcModel = new BasicIfcModel(packageMetaData, null);
 		if (oldLastRevision != null) {
-			int highestStopId = AbstractDownloadDatabaseAction.findHighestStopRid(project, concreteRevision);
-			getDatabaseSession().getMap(ifcModel, new Query(longTransaction.getPackageMetaData(), project.getId(), oldLastRevision.getId(), -1, null, Deep.YES, highestStopId));
+			int highestStopId = AbstractDownloadDatabaseAction.findHighestStopRid(project, oldLastRevision.getLastConcreteRevision());
+			Query query = new Query(longTransaction.getPackageMetaData(), project.getId(), oldLastRevision.getId(), -1, null, Deep.YES, highestStopId);
+			query.updateOidCounters(oldLastRevision.getLastConcreteRevision(), getDatabaseSession());
+			getDatabaseSession().getMap(ifcModel, query);
 		}
 		
 		getDatabaseSession().addPostCommitAction(new PostCommitAction() {
@@ -170,7 +172,10 @@ public class CommitTransactionDatabaseAction extends GenericCheckinDatabaseActio
 			}
 			revision.setHasGeometry(true);
 		}
-		
+
+		if (oldLastRevision != null) {
+			concreteRevision.setOidCounters(oldLastRevision.getConcreteRevisions().get(0).getOidCounters());
+		}
 		concreteRevision.setSummary(summaryMap.toRevisionSummary(getDatabaseSession()));
 
 		getDatabaseSession().store(concreteRevision);

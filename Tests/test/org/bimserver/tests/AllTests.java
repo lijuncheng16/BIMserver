@@ -97,7 +97,7 @@ public class AllTests {
 		bimServer = new BimServer(config);
 		try {
 			// CHANGE THESE TO MATCH YOUR CONFIGURATION
-			File[] pluginDirectories = new File[]{new File("D:\\Git\\BIMserverMaster")};
+			File[] pluginDirectories = new File[]{new File("C:\\Git\\BIMserver")};
 			
 			// Load plugins
 			LocalDevPluginLoader.loadPlugins(bimServer.getPluginManager(), pluginDirectories);

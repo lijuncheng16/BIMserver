@@ -176,6 +176,7 @@ public interface IfcModelInterface extends Iterable<IdEObject>, ObjectFactory {
 	ModelMetaData getModelMetaData();
 	
 	void fixOids(OidProvider<Long> oidProvider);
+	void fixOidsFlat(OidProvider<Long> oidProvider);
 	void setObjectOids();
 	void indexGuids();
 	long getHighestOid();
@@ -226,4 +227,8 @@ public interface IfcModelInterface extends Iterable<IdEObject>, ObjectFactory {
 	Set<EClass> getUsedClasses();
 
 	void query(ObjectNode query);
+
+	<T extends IdEObject> T createAndAdd(EClass eClass, long oid) throws IfcModelInterfaceException;
+
+	<T extends IdEObject> T createAndAdd(EClass eClass) throws IfcModelInterfaceException;
 }

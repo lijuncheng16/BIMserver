@@ -191,6 +191,7 @@ public class BimServer {
 	private MetaDataManager metaDataManager;
 	private SchemaConverterManager schemaConverterManager = new SchemaConverterManager();
 	private WebModuleManager webModuleManager;
+	private MetricsRegistry metricsRegistry;
 
 	/**
 	 * Create a new BIMserver
@@ -359,6 +360,8 @@ public class BimServer {
 			schemaConverterManager.registerConverter(new Ifc2x3tc1ToIfc4SchemaConverterFactory());
 			schemaConverterManager.registerConverter(new Ifc4ToIfc2x3tc1SchemaConverterFactory());
 			
+			metricsRegistry = new MetricsRegistry();
+			
 			Query.setPackageMetaDataForDefaultQuery(metaDataManager.getPackageMetaData("store"));
 			
 			bimDatabase = new Database(this, packages, keyValueStore, metaDataManager);
@@ -495,7 +498,7 @@ public class BimServer {
 			pluginConfiguration.setPluginDescriptor(pluginDescriptor);
 			
 			// For the opposite of setPluginDescriptor
-			session.store(pluginDescriptor);
+			//session.store(pluginDescriptor); Disabled for now, this creates massive lists, that are not really useful...
 			
 			pluginConfiguration.setDescription(plugin.getDescription());
 			pluginConfiguration.setEnabled(true);
@@ -506,8 +509,7 @@ public class BimServer {
 	}
 
 	private PluginDescriptor getPluginDescriptor(DatabaseSession session, String pluginClassName) throws BimserverDatabaseException {
-		Condition condition = new AttributeCondition(StorePackage.eINSTANCE.getPluginDescriptor_PluginClassName(), new StringLiteral(pluginClassName));
-		return session.querySingle(condition, PluginDescriptor.class, Query.getDefault());
+		return session.querySingle(StorePackage.eINSTANCE.getPluginDescriptor_PluginClassName(), pluginClassName);
 	}
 	
 	public void updateUserSettings(DatabaseSession session, User user) throws BimserverLockConflictException, BimserverDatabaseException {
@@ -739,8 +741,10 @@ public class BimServer {
 					setDefaultWebModule(pluginManager.getWebModulePlugin(bimviewsWebModule.getPluginDescriptor().getPluginClassName(), true));
 				} else {
 					WebModulePluginConfiguration defaultWebModule = findWebModule(serverSettings, "org.bimserver.defaultwebmodule.DefaultWebModulePlugin");
-					serverSettings.setWebModule(defaultWebModule);
-					setDefaultWebModule(pluginManager.getWebModulePlugin(defaultWebModule.getPluginDescriptor().getPluginClassName(), true));
+					if (defaultWebModule != null) {
+						serverSettings.setWebModule(defaultWebModule);
+						setDefaultWebModule(pluginManager.getWebModulePlugin(defaultWebModule.getPluginDescriptor().getPluginClassName(), true));
+					}
 				}
 			}
 			session.store(serverSettings);
@@ -1075,5 +1079,9 @@ public class BimServer {
 	
 	public SchemaConverterManager getSchemaConverterManager() {
 		return schemaConverterManager;
+	}
+
+	public MetricsRegistry getMetricsRegistry() {
+		return metricsRegistry;
 	}
 }
