@@ -1,26 +1,9 @@
 package org.bimserver.tests;
 
-/******************************************************************************
- * Copyright (C) 2009-2015  BIMserver.org
- * 
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Affero General Public License as
- * published by the Free Software Foundation, either version 3 of the
- * License, or (at your option) any later version.
- * 
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Affero General Public License for more details.
- * 
- * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *****************************************************************************/
-
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-import org.apache.commons.io.FileUtils;
 import org.bimserver.BimServer;
 import org.bimserver.BimServerConfig;
 import org.bimserver.LocalDevPluginLoader;
@@ -34,6 +17,7 @@ import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.services.BimServerClientInterface;
 import org.bimserver.shared.LocalDevelopmentResourceFetcher;
 import org.bimserver.shared.UsernamePasswordAuthenticationInfo;
+import org.bimserver.utils.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,7 +72,7 @@ public class TestIfcEngineEmbedded {
 				SProject project = client.getBimsie1ServiceInterface().addProject("test" + Math.random(), "ifc2x3tc1");
 				
 				// This is the test file
-				File testIfcFile = new File("../TestData/data/" + filename);
+				Path testIfcFile = Paths.get("../TestData/data/" + filename);
 				
 				// Checkin the file
 				client.checkin(project.getOid(), "testing ifc engine", deserializer.getOid(), false, true, testIfcFile);
@@ -100,7 +84,7 @@ public class TestIfcEngineEmbedded {
 				SSerializerPluginConfiguration serializer = client.getBimsie1ServiceInterface().getSerializerByContentType("application/collada");
 
 				// Download as collada			
-				client.download(project.getLastRevisionId(), serializer.getOid(), new File(testIfcFile.getName() + ".dae"));
+				client.download(project.getLastRevisionId(), serializer.getOid(), Paths.get(testIfcFile.getFileName().toString() + ".dae"));
 			} catch (Exception e) {
 				exception = e;
 			} finally {
@@ -108,32 +92,27 @@ public class TestIfcEngineEmbedded {
 					client.disconnect();
 				}
 			}
-			
 		}
-		
 	}
-	
 	
 	public static void main(String[] args) {
 		// Create a config
 		BimServerConfig config = new BimServerConfig();
-		File home = new File("home");
+		Path home = Paths.get("home");
 		
 		// Remove the home dir if it's there
 		if (WIPE_HOMEDIR) {
-			if (home.exists()) {
-				try {
-					FileUtils.deleteDirectory(home);
-				} catch (IOException e) {
-					// Meh.
-				}
+			try {
+				PathUtils.removeDirectoryWithContent(home);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
 		}
 		
 		config.setHomeDir(home);
 		config.setStartEmbeddedWebServer(true);
 		config.setPort(8080);
-		config.setResourceFetcher(new LocalDevelopmentResourceFetcher(new File("../")));
+		config.setResourceFetcher(new LocalDevelopmentResourceFetcher(Paths.get("../")));
 		config.setClassPath(System.getProperty("java.class.path"));
 		
 		// Create a BIMserver
@@ -141,7 +120,7 @@ public class TestIfcEngineEmbedded {
 		BimServerClientInterface client = null;
 		try {
 			// Load plugins
-			File[] pluginDirs = new File[] {
+			Path[] pluginDirs = new Path[] {
 				// TODO: Set these up yourself...
 			};
 			LocalDevPluginLoader.loadPlugins(bimServer.getPluginManager(), pluginDirs);
