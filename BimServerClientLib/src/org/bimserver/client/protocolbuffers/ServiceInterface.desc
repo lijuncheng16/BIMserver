@@ -1,5 +1,5 @@
 
-Ûç
+‰ò
 ServiceInterface.protoorg.bimserver.pb"$
 VoidResponse
 errorMessage (	"
@@ -168,9 +168,22 @@ revisionId (
 sync ("=
 CheckinFromUrlResponse
 errorMessage (	
-value (",
-CleanupLongActionRequest
-actionId ("r
+value ("±
+CheckinInitiatedRequest
+topicId (
+poid (
+comment (	
+deserializerOid (
+fileSize (
+fileName (	
+data (
+merge (
+sync	 ("?
+CheckinInitiatedResponse
+errorMessage (	
+value ("+
+CleanupLongActionRequest
+topicId ("r
 CompareRequest
 roid1 (
 roid2 (4
@@ -523,7 +536,33 @@ $GetAvailableClassesInRevisionRequest
 z	 ("S
 GetGeoTagResponse
 errorMessage (	(
-value (2.org.bimserver.pb.SGeoTag"$
+value (2.org.bimserver.pb.SGeoTag"3
+GetGeometryInfoRequest
+roid (
+oid ("F
+	SVector3f
+oid (
+rid (	
+x (	
+y (	
+z ("ê
+SGeometryInfo
+area (
+dataId (.
+	maxBounds (2.org.bimserver.pb.SVector3f.
+	minBounds (2.org.bimserver.pb.SVector3f
+oid (
+primitiveCount (
+rid (
+
+startIndex (
+startVertex	 (
+transformation
+ (
+volume ("_
+GetGeometryInfoResponse
+errorMessage (	.
+value (2.org.bimserver.pb.SGeometryInfo"$
 GetIfcHeaderRequest
 croid ("å
 
@@ -548,7 +587,12 @@ SIfcHeader
 mcioid ("o
 GetModelCheckerInstanceResponse
 errorMessage (	6
-value (2'.org.bimserver.pb.SModelCheckerInstance"1
+value (2'.org.bimserver.pb.SModelCheckerInstance"&
+GetNrPrimitivesRequest
+roid (">
+GetNrPrimitivesResponse
+errorMessage (	
+value ("1
 GetOidByGuidRequest
 roid (
 guid (	";
@@ -945,7 +989,13 @@ objectIDMs (
 address (	
 username (	
 password (	
-path (	"M
+path (	"?
+InitiateCheckinRequest
+poid (
+deserializerOid (">
+InitiateCheckinResponse
+errorMessage (	
+value ("M
 $RemoveModelCheckerFromProjectRequest
 poid (
 modelCheckerOid ("C
@@ -1066,7 +1116,7 @@ serviceOid ("F
 SNotifictionResultEnum_NR_ERROR "
 SNotifictionResultEnum_SUCCESS+
 'SNotifictionResultEnum_PROGRESS_UNKNOWN.
-*SNotifictionResultEnum_PROGRESS_PERCENTAGE2ŒH
+*SNotifictionResultEnum_PROGRESS_PERCENTAGE2ÒK
 ServiceInterfacex
 addExtendedDataSchema..org.bimserver.pb.AddExtendedDataSchemaRequest/.org.bimserver.pb.AddExtendedDataSchemaResponsem
 addExtendedDataToProject1.org.bimserver.pb.AddExtendedDataToProjectRequest.org.bimserver.pb.VoidResponsem
@@ -1080,7 +1130,8 @@ serviceOid ("F
 addUserWithPassword,.org.bimserver.pb.AddUserWithPasswordRequest-.org.bimserver.pb.AddUserWithPasswordResponseY
 changeUserType'.org.bimserver.pb.ChangeUserTypeRequest.org.bimserver.pb.VoidResponseN
 checkin .org.bimserver.pb.CheckinRequest!.org.bimserver.pb.CheckinResponsec
-checkinFromUrl'.org.bimserver.pb.CheckinFromUrlRequest(.org.bimserver.pb.CheckinFromUrlResponse_
+checkinFromUrl'.org.bimserver.pb.CheckinFromUrlRequest(.org.bimserver.pb.CheckinFromUrlResponsei
+checkinInitiated).org.bimserver.pb.CheckinInitiatedRequest*.org.bimserver.pb.CheckinInitiatedResponse_
 cleanupLongAction*.org.bimserver.pb.CleanupLongActionRequest.org.bimserver.pb.VoidResponseN
 compare .org.bimserver.pb.CompareRequest!.org.bimserver.pb.CompareResponseW
 deleteService&.org.bimserver.pb.DeleteServiceRequest.org.bimserver.pb.VoidResponseW
@@ -1117,9 +1168,11 @@ deleteUser#.org.bimserver.pb.DeleteUserRequest$.org.bimserver.pb.DeleteUserRes
 getCheckoutWarnings,.org.bimserver.pb.GetCheckoutWarningsRequest-.org.bimserver.pb.GetCheckoutWarningsResponse¢
 #getExtendedDataSchemaFromRepository<.org.bimserver.pb.GetExtendedDataSchemaFromRepositoryRequest=.org.bimserver.pb.GetExtendedDataSchemaFromRepositoryResponseN
 getFile .org.bimserver.pb.GetFileRequest!.org.bimserver.pb.GetFileResponseT
-	getGeoTag".org.bimserver.pb.GetGeoTagRequest#.org.bimserver.pb.GetGeoTagResponse]
+	getGeoTag".org.bimserver.pb.GetGeoTagRequest#.org.bimserver.pb.GetGeoTagResponsef
+getGeometryInfo(.org.bimserver.pb.GetGeometryInfoRequest).org.bimserver.pb.GetGeometryInfoResponse]
 getIfcHeader%.org.bimserver.pb.GetIfcHeaderRequest&.org.bimserver.pb.GetIfcHeaderResponse~
-getModelCheckerInstance0.org.bimserver.pb.GetModelCheckerInstanceRequest1.org.bimserver.pb.GetModelCheckerInstanceResponse]
+getModelCheckerInstance0.org.bimserver.pb.GetModelCheckerInstanceRequest1.org.bimserver.pb.GetModelCheckerInstanceResponsef
+getNrPrimitives(.org.bimserver.pb.GetNrPrimitivesRequest).org.bimserver.pb.GetNrPrimitivesResponse]
 getOidByGuid%.org.bimserver.pb.GetOidByGuidRequest&.org.bimserver.pb.GetOidByGuidResponsex
 getQueryEngineExample..org.bimserver.pb.GetQueryEngineExampleRequest/.org.bimserver.pb.GetQueryEngineExampleResponseÑ
 getQueryEngineExampleKeys2.org.bimserver.pb.GetQueryEngineExampleKeysRequest3.org.bimserver.pb.GetQueryEngineExampleKeysResponseo
@@ -1134,7 +1187,8 @@ getService#.org.bimserver.pb.GetServiceRequest$.org.bimserver.pb.GetServiceRes
 getUsersProjects).org.bimserver.pb.GetUsersProjectsRequest*.org.bimserver.pb.GetUsersProjectsResponseT
 	getVolume".org.bimserver.pb.GetVolumeRequest#.org.bimserver.pb.GetVolumeResponseQ
 
-importData#.org.bimserver.pb.ImportDataRequest.org.bimserver.pb.VoidResponsew
+importData#.org.bimserver.pb.ImportDataRequest.org.bimserver.pb.VoidResponsef
+initiateCheckin(.org.bimserver.pb.InitiateCheckinRequest).org.bimserver.pb.InitiateCheckinResponsew
 removeModelCheckerFromProject6.org.bimserver.pb.RemoveModelCheckerFromProjectRequest.org.bimserver.pb.VoidResponsem
 removeServiceFromProject1.org.bimserver.pb.RemoveServiceFromProjectRequest.org.bimserver.pb.VoidResponse}
  removeUserFromExtendedDataSchema9.org.bimserver.pb.RemoveUserFromExtendedDataSchemaRequest.org.bimserver.pb.VoidResponsex

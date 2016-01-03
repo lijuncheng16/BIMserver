@@ -43,26 +43,6 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	NULL(0, "NULL", "NULL"),
 
 	/**
-	 * The '<em><b>ENGINEGENERATOR</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #ENGINEGENERATOR_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	ENGINEGENERATOR(1, "ENGINEGENERATOR", "ENGINEGENERATOR"),
-
-	/**
-	 * The '<em><b>NOTDEFINED</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #NOTDEFINED_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	NOTDEFINED(2, "NOTDEFINED", "NOTDEFINED"),
-
-	/**
 	 * The '<em><b>STANDALONE</b></em>' literal object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -70,17 +50,23 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	STANDALONE(3, "STANDALONE", "STANDALONE"),
-
-	/**
-	 * The '<em><b>USERDEFINED</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #USERDEFINED_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	USERDEFINED(4, "USERDEFINED", "USERDEFINED"),
+	STANDALONE(1, "STANDALONE", "STANDALONE"), /**
+												* The '<em><b>NOTDEFINED</b></em>' literal object.
+												* <!-- begin-user-doc -->
+												* <!-- end-user-doc -->
+												* @see #NOTDEFINED_VALUE
+												* @generated
+												* @ordered
+												*/
+	NOTDEFINED(2, "NOTDEFINED", "NOTDEFINED"), /**
+												* The '<em><b>ENGINEGENERATOR</b></em>' literal object.
+												* <!-- begin-user-doc -->
+												* <!-- end-user-doc -->
+												* @see #ENGINEGENERATOR_VALUE
+												* @generated
+												* @ordered
+												*/
+	ENGINEGENERATOR(3, "ENGINEGENERATOR", "ENGINEGENERATOR"),
 
 	/**
 	 * The '<em><b>CHP</b></em>' literal object.
@@ -90,7 +76,15 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	CHP(5, "CHP", "CHP");
+	CHP(4, "CHP", "CHP"), /**
+							* The '<em><b>USERDEFINED</b></em>' literal object.
+							* <!-- begin-user-doc -->
+							* <!-- end-user-doc -->
+							* @see #USERDEFINED_VALUE
+							* @generated
+							* @ordered
+							*/
+	USERDEFINED(5, "USERDEFINED", "USERDEFINED");
 
 	/**
 	 * The '<em><b>NULL</b></em>' literal value.
@@ -108,19 +102,19 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	public static final int NULL_VALUE = 0;
 
 	/**
-	 * The '<em><b>ENGINEGENERATOR</b></em>' literal value.
+	 * The '<em><b>STANDALONE</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
-	 * If the meaning of '<em><b>ENGINEGENERATOR</b></em>' literal object isn't clear,
+	 * If the meaning of '<em><b>STANDALONE</b></em>' literal object isn't clear,
 	 * there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
-	 * @see #ENGINEGENERATOR
+	 * @see #STANDALONE
 	 * @model
 	 * @generated
 	 * @ordered
 	 */
-	public static final int ENGINEGENERATOR_VALUE = 1;
+	public static final int STANDALONE_VALUE = 1;
 
 	/**
 	 * The '<em><b>NOTDEFINED</b></em>' literal value.
@@ -138,34 +132,19 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	public static final int NOTDEFINED_VALUE = 2;
 
 	/**
-	 * The '<em><b>STANDALONE</b></em>' literal value.
+	 * The '<em><b>ENGINEGENERATOR</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
-	 * If the meaning of '<em><b>STANDALONE</b></em>' literal object isn't clear,
+	 * If the meaning of '<em><b>ENGINEGENERATOR</b></em>' literal object isn't clear,
 	 * there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
-	 * @see #STANDALONE
+	 * @see #ENGINEGENERATOR
 	 * @model
 	 * @generated
 	 * @ordered
 	 */
-	public static final int STANDALONE_VALUE = 3;
-
-	/**
-	 * The '<em><b>USERDEFINED</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>USERDEFINED</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #USERDEFINED
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int USERDEFINED_VALUE = 4;
+	public static final int ENGINEGENERATOR_VALUE = 3;
 
 	/**
 	 * The '<em><b>CHP</b></em>' literal value.
@@ -180,7 +159,22 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int CHP_VALUE = 5;
+	public static final int CHP_VALUE = 4;
+
+	/**
+	 * The '<em><b>USERDEFINED</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>USERDEFINED</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #USERDEFINED
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int USERDEFINED_VALUE = 5;
 
 	/**
 	 * An array of all the '<em><b>Ifc Electric Generator Type Enum</b></em>' enumerators.
@@ -188,7 +182,8 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private static final IfcElectricGeneratorTypeEnum[] VALUES_ARRAY = new IfcElectricGeneratorTypeEnum[] { NULL, ENGINEGENERATOR, NOTDEFINED, STANDALONE, USERDEFINED, CHP, };
+	private static final IfcElectricGeneratorTypeEnum[] VALUES_ARRAY = new IfcElectricGeneratorTypeEnum[] { NULL,
+			STANDALONE, NOTDEFINED, ENGINEGENERATOR, CHP, USERDEFINED, };
 
 	/**
 	 * A public read-only list of all the '<em><b>Ifc Electric Generator Type Enum</b></em>' enumerators.
@@ -196,12 +191,15 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public static final List<IfcElectricGeneratorTypeEnum> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
+	public static final List<IfcElectricGeneratorTypeEnum> VALUES = Collections
+			.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
 	/**
 	 * Returns the '<em><b>Ifc Electric Generator Type Enum</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param literal the literal.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcElectricGeneratorTypeEnum get(String literal) {
@@ -218,6 +216,8 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Electric Generator Type Enum</b></em>' literal with the specified name.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param name the name.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcElectricGeneratorTypeEnum getByName(String name) {
@@ -234,22 +234,24 @@ public enum IfcElectricGeneratorTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Electric Generator Type Enum</b></em>' literal with the specified integer value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param value the integer value.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcElectricGeneratorTypeEnum get(int value) {
 		switch (value) {
 		case NULL_VALUE:
 			return NULL;
-		case ENGINEGENERATOR_VALUE:
-			return ENGINEGENERATOR;
-		case NOTDEFINED_VALUE:
-			return NOTDEFINED;
 		case STANDALONE_VALUE:
 			return STANDALONE;
-		case USERDEFINED_VALUE:
-			return USERDEFINED;
+		case NOTDEFINED_VALUE:
+			return NOTDEFINED;
+		case ENGINEGENERATOR_VALUE:
+			return ENGINEGENERATOR;
 		case CHP_VALUE:
 			return CHP;
+		case USERDEFINED_VALUE:
+			return USERDEFINED;
 		}
 		return null;
 	}

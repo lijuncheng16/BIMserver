@@ -1,5 +1,5 @@
 
-íT
+ûW
 Bimsie1ServiceInterface.protoorg.bimserver.pbServiceInterface.protoAdminInterface.protoMetaInterface.protoSettingsInterface.protoAuthInterface.protoPluginInterface.proto"g
  AddExtendedDataToRevisionRequest
 roid (5
@@ -79,6 +79,14 @@ parentPoid (
 sync (">
 DownloadByNamesResponse
 errorMessage (	
+value ("b
+DownloadByNewJsonQueryRequest
+roids (
+query (	
+serializerOid (
+sync ("E
+DownloadByNewJsonQueryResponse
+errorMessage (	
 value ("g
 DownloadByOidsRequest
 roids (
@@ -148,9 +156,9 @@ onlyActive ("Y
 deserializerName (	"x
 GetDeserializerByNameResponse
 errorMessage (	A
-value (22.org.bimserver.pb.SDeserializerPluginConfiguration"*
-GetDownloadDataRequest
-actionId ("b
+value (22.org.bimserver.pb.SDeserializerPluginConfiguration")
+GetDownloadDataRequest
+topicId ("b
 SCheckoutResult
 file (
 oid (
@@ -240,14 +248,14 @@ revisionNr (
 poid ("‡
 ,GetSuggestedDeserializerForExtensionResponse
 errorMessage (	A
-value (22.org.bimserver.pb.SDeserializerPluginConfiguration"5
-!TerminateLongRunningActionRequest
-actionId ("&
+value (22.org.bimserver.pb.SDeserializerPluginConfiguration"4
+!TerminateLongRunningActionRequest
+topicId ("&
 UndeleteProjectRequest
 poid (">
 UndeleteProjectResponse
 errorMessage (	
-value (2¨#
+value (2%
 Bimsie1ServiceInterfaceo
 addExtendedDataToRevision2.org.bimserver.pb.AddExtendedDataToRevisionRequest.org.bimserver.pb.VoidResponseW
 
@@ -262,7 +270,8 @@ addProject#.org.bimserver.pb.AddProjectRequest$.org.bimserver.pb.AddProjectRes
 download!.org.bimserver.pb.DownloadRequest".org.bimserver.pb.DownloadResponsef
 downloadByGuids(.org.bimserver.pb.DownloadByGuidsRequest).org.bimserver.pb.DownloadByGuidsResponser
 downloadByJsonQuery,.org.bimserver.pb.DownloadByJsonQueryRequest-.org.bimserver.pb.DownloadByJsonQueryResponsef
-downloadByNames(.org.bimserver.pb.DownloadByNamesRequest).org.bimserver.pb.DownloadByNamesResponsec
+downloadByNames(.org.bimserver.pb.DownloadByNamesRequest).org.bimserver.pb.DownloadByNamesResponse{
+downloadByNewJsonQuery/.org.bimserver.pb.DownloadByNewJsonQueryRequest0.org.bimserver.pb.DownloadByNewJsonQueryResponsec
 downloadByOids'.org.bimserver.pb.DownloadByOidsRequest(.org.bimserver.pb.DownloadByOidsResponsef
 downloadByTypes(.org.bimserver.pb.DownloadByTypesRequest).org.bimserver.pb.DownloadByTypesResponse`
 downloadQuery&.org.bimserver.pb.DownloadQueryRequest'.org.bimserver.pb.DownloadQueryResponsel
@@ -287,6 +296,7 @@ addProject#.org.bimserver.pb.AddProjectRequest$.org.bimserver.pb.AddProjectRes
 getSerializerById*.org.bimserver.pb.GetSerializerByIdRequest+.org.bimserver.pb.GetSerializerByIdResponser
 getSerializerByName,.org.bimserver.pb.GetSerializerByNameRequest-.org.bimserver.pb.GetSerializerByNameResponsec
 getSubProjects'.org.bimserver.pb.GetSubProjectsRequest(.org.bimserver.pb.GetSubProjectsResponse¥
-$getSuggestedDeserializerForExtension=.org.bimserver.pb.GetSuggestedDeserializerForExtensionRequest>.org.bimserver.pb.GetSuggestedDeserializerForExtensionResponseq
+$getSuggestedDeserializerForExtension=.org.bimserver.pb.GetSuggestedDeserializerForExtensionRequest>.org.bimserver.pb.GetSuggestedDeserializerForExtensionResponsef
+initiateCheckin(.org.bimserver.pb.InitiateCheckinRequest).org.bimserver.pb.InitiateCheckinResponseq
 terminateLongRunningAction3.org.bimserver.pb.TerminateLongRunningActionRequest.org.bimserver.pb.VoidResponsef
 undeleteProject(.org.bimserver.pb.UndeleteProjectRequest).org.bimserver.pb.UndeleteProjectResponseB"BBimsie1ServiceInterfaceImplHˆ

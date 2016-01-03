@@ -26,10 +26,10 @@ import javax.mail.internet.InternetAddress;
 
 import org.apache.commons.collections.comparators.ComparatorChain;
 import org.bimserver.BimServerImporter;
+import org.bimserver.BimserverDatabaseException;
 import org.bimserver.client.json.JsonBimServerClientFactory;
-import org.bimserver.database.BimserverDatabaseException;
 import org.bimserver.database.DatabaseSession;
-import org.bimserver.database.Query;
+import org.bimserver.database.OldQuery;
 import org.bimserver.database.actions.AddExtendedDataSchemaDatabaseAction;
 import org.bimserver.database.actions.AddExtendedDataToProjectDatabaseAction;
 import org.bimserver.database.actions.AddLocalServiceToProjectDatabaseAction;
@@ -65,8 +65,10 @@ import org.bimserver.database.actions.GetAvailableClassesInRevisionDatabaseActio
 import org.bimserver.database.actions.GetCheckinWarningsDatabaseAction;
 import org.bimserver.database.actions.GetCheckoutWarningsDatabaseAction;
 import org.bimserver.database.actions.GetGeoTagDatabaseAction;
+import org.bimserver.database.actions.GetGeometryInfoDatabaseAction;
 import org.bimserver.database.actions.GetIfcHeaderDatabaseAction;
 import org.bimserver.database.actions.GetModelCheckerOidDatabaseAction;
+import org.bimserver.database.actions.GetNrPrimitivesDatabaseAction;
 import org.bimserver.database.actions.GetOidByGuidDatabaseAction;
 import org.bimserver.database.actions.GetProjectsOfUserDatabaseAction;
 import org.bimserver.database.actions.GetRevisionSummaryDatabaseAction;
@@ -78,6 +80,7 @@ import org.bimserver.database.actions.RemoveServiceFromProjectDatabaseAction;
 import org.bimserver.database.actions.RemoveUserFromExtendedDataSchemaDatabaseAction;
 import org.bimserver.database.actions.RemoveUserFromProjectDatabaseAction;
 import org.bimserver.database.actions.SetRevisionTagDatabaseAction;
+import org.bimserver.database.actions.StreamingCheckinDatabaseAction;
 import org.bimserver.database.actions.UndeleteUserDatabaseAction;
 import org.bimserver.database.actions.UpdateGeoTagDatabaseAction;
 import org.bimserver.database.actions.UpdateModelCheckerDatabaseAction;
@@ -102,11 +105,13 @@ import org.bimserver.interfaces.objects.SExtendedDataSchema;
 import org.bimserver.interfaces.objects.SExtendedDataSchemaType;
 import org.bimserver.interfaces.objects.SFile;
 import org.bimserver.interfaces.objects.SGeoTag;
+import org.bimserver.interfaces.objects.SGeometryInfo;
 import org.bimserver.interfaces.objects.SIfcHeader;
 import org.bimserver.interfaces.objects.SLogAction;
 import org.bimserver.interfaces.objects.SModelCheckerInstance;
 import org.bimserver.interfaces.objects.SPluginDescriptor;
 import org.bimserver.interfaces.objects.SProfileDescriptor;
+import org.bimserver.interfaces.objects.SProgressTopicType;
 import org.bimserver.interfaces.objects.SProject;
 import org.bimserver.interfaces.objects.SProjectSmall;
 import org.bimserver.interfaces.objects.SQueryEnginePluginConfiguration;
@@ -120,7 +125,9 @@ import org.bimserver.interfaces.objects.SUserType;
 import org.bimserver.longaction.DownloadParameters;
 import org.bimserver.longaction.DownloadParameters.DownloadType;
 import org.bimserver.longaction.LongCheckinAction;
+import org.bimserver.longaction.LongStreamingCheckinAction;
 import org.bimserver.mail.EmailMessage;
+import org.bimserver.mail.MailSystem;
 import org.bimserver.models.log.LogAction;
 import org.bimserver.models.store.Checkout;
 import org.bimserver.models.store.CompareResult;
@@ -131,6 +138,7 @@ import org.bimserver.models.store.GeoTag;
 import org.bimserver.models.store.InternalServicePluginConfiguration;
 import org.bimserver.models.store.ModelCheckerInstance;
 import org.bimserver.models.store.ObjectState;
+import org.bimserver.models.store.ObjectType;
 import org.bimserver.models.store.Project;
 import org.bimserver.models.store.Revision;
 import org.bimserver.models.store.RevisionSummary;
@@ -139,7 +147,13 @@ import org.bimserver.models.store.User;
 import org.bimserver.models.store.UserType;
 import org.bimserver.notifications.NewExtendedDataOnRevisionNotification;
 import org.bimserver.notifications.NewRevisionNotification;
+import org.bimserver.notifications.ProgressOnProjectTopic;
+import org.bimserver.plugins.Plugin;
+import org.bimserver.plugins.PluginConfiguration;
 import org.bimserver.plugins.deserializers.Deserializer;
+import org.bimserver.plugins.deserializers.DeserializerPlugin;
+import org.bimserver.plugins.deserializers.StreamingDeserializer;
+import org.bimserver.plugins.deserializers.StreamingDeserializerPlugin;
 import org.bimserver.plugins.queryengine.QueryEnginePlugin;
 import org.bimserver.plugins.services.BimServerClientInterface;
 import org.bimserver.shared.BimServerClientFactory;
@@ -170,17 +184,46 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 	public ServiceImpl(ServiceMap serviceMap) {
 		super(serviceMap);
 	}
+	
+	@Override
+	public Long initiateCheckin(Long poid, Long deserializerOid) throws ServerException, UserException {
+		requireAuthenticationAndRunningServer();
+		final DatabaseSession session = getBimServer().getDatabase().createSession();
+		try {
+			User user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
+			Project project = session.get(poid, OldQuery.getDefault());
+			if (!getAuthorization().hasRightsOnProjectOrSuperProjects(user, project)) {
+				throw new UserException("User has no rights to checkin models to this project");
+			}
+			if (!MailSystem.isValidEmailAddress(user.getUsername())) {
+				throw new UserException("Users must have a valid e-mail address to checkin");
+			}
+			if (project == null) {
+				throw new UserException("No project found with poid " + poid);
+			}
+			
+			ProgressOnProjectTopic progressTopic = getBimServer().getNotificationsManager().createProgressOnProjectTopic(getAuthorization().getUoid(), poid, SProgressTopicType.UPLOAD, "Checkin");
+			
+			return progressTopic.getKey().getId();
+		} catch (UserException e) {
+			throw e;
+		} catch (Throwable e) {
+			LOGGER.error("", e);
+			throw new ServerException(e);
+		} finally {
+			session.close();
+		}
+	}
 
 	@Override
-	public Long checkin(final Long poid, final String comment, Long deserializerOid, Long fileSize, String fileName, DataHandler dataHandler, Boolean merge, Boolean sync)
-			throws ServerException, UserException {
+	public Long checkinInitiated(Long topicId, final Long poid, final String comment, Long deserializerOid, Long fileSize, String fileName, DataHandler dataHandler, Boolean merge, Boolean sync) throws ServerException, UserException {
 		requireAuthenticationAndRunningServer();
 		final DatabaseSession session = getBimServer().getDatabase().createSession();
 		String username = "Unknown";
 		String userUsername = "Unknown";
 		try {
-			User user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), Query.getDefault());
-			Project project = session.get(poid, Query.getDefault());
+			User user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
+			Project project = session.get(poid, OldQuery.getDefault());
 			if (project == null) {
 				throw new UserException("No project found with poid " + poid);
 			}
@@ -203,24 +246,50 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 			DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
 			String cacheFileName = dateFormat.format(new Date()) + "-" + fileName;
 			Path file = userDirIncoming.resolve(cacheFileName);
-			DeserializerPluginConfiguration deserializerObject = session.get(StorePackage.eINSTANCE.getDeserializerPluginConfiguration(), deserializerOid, Query.getDefault());
-			if (deserializerObject == null) {
+			DeserializerPluginConfiguration deserializerPluginConfiguration = session.get(StorePackage.eINSTANCE.getDeserializerPluginConfiguration(), deserializerOid, OldQuery.getDefault());
+			if (deserializerPluginConfiguration == null) {
 				throw new UserException("Deserializer with oid " + deserializerOid + " not found");
+			} else {
+				Plugin plugin = getBimServer().getPluginManager().getPlugin(deserializerPluginConfiguration.getPluginDescriptor().getPluginClassName(), true);
+				if (plugin != null) {
+					if (plugin instanceof DeserializerPlugin) {
+						DeserializerPlugin deserializerPlugin = (DeserializerPlugin)plugin;
+						ObjectType settings = deserializerPluginConfiguration.getSettings();
+						Deserializer deserializer = deserializerPlugin.createDeserializer(new PluginConfiguration(settings));
+						OutputStream outputStream = Files.newOutputStream(file);
+						InputStream inputStream = new MultiplexingInputStream(dataHandler.getInputStream(), outputStream);
+						deserializer.init(getBimServer().getDatabase().getMetaDataManager().getPackageMetaData(project.getSchema()));
+						
+						IfcModelInterface model = deserializer.read(inputStream, fileName, fileSize, null);
+						
+						CheckinDatabaseAction checkinDatabaseAction = new CheckinDatabaseAction(getBimServer(), null, getInternalAccessMethod(), poid, getAuthorization(), model, comment, fileName, merge);
+						LongCheckinAction longAction = new LongCheckinAction(topicId, getBimServer(), username, userUsername, getAuthorization(), checkinDatabaseAction);
+						getBimServer().getLongActionManager().start(longAction);
+						if (sync) {
+							longAction.waitForCompletion();
+						}
+						return longAction.getProgressTopic().getKey().getId();
+					} else if (plugin instanceof StreamingDeserializerPlugin) {
+						StreamingDeserializerPlugin streaminDeserializerPlugin = (StreamingDeserializerPlugin) plugin;
+						ObjectType settings = deserializerPluginConfiguration.getSettings();
+						StreamingDeserializer streamingDeserializer = streaminDeserializerPlugin.createDeserializer(new PluginConfiguration(settings));
+						streamingDeserializer.init(getBimServer().getMetaDataManager().getPackageMetaData("ifc2x3tc1"));
+						OutputStream outputStream = Files.newOutputStream(file);
+						InputStream inputStream = new MultiplexingInputStream(dataHandler.getInputStream(), outputStream);
+						StreamingCheckinDatabaseAction checkinDatabaseAction = new StreamingCheckinDatabaseAction(getBimServer(), null, getInternalAccessMethod(), poid, getAuthorization(), comment, fileName, inputStream, streamingDeserializer);
+						LongStreamingCheckinAction longAction = new LongStreamingCheckinAction(topicId, getBimServer(), username, userUsername, getAuthorization(), checkinDatabaseAction);
+						getBimServer().getLongActionManager().start(longAction);
+						if (sync) {
+							longAction.waitForCompletion();
+						}
+						return longAction.getProgressTopic().getKey().getId();
+					} else {
+						throw new UserException("No (enabled) (streaming) deserializer found with oid " + deserializerOid);
+					}
+				} else {
+					throw new UserException("No (enabled) (streaming) deserializer found with oid " + deserializerOid);
+				}
 			}
-			OutputStream outputStream = Files.newOutputStream(file);
-			InputStream inputStream = new MultiplexingInputStream(dataHandler.getInputStream(), outputStream);
-			Deserializer deserializer = getBimServer().getDeserializerFactory().createDeserializer(deserializerOid);
-			deserializer.init(getBimServer().getDatabase().getMetaDataManager().getPackageMetaData(project.getSchema()));
-			
-			IfcModelInterface model = deserializer.read(inputStream, fileName, 0, null);
-			
-			CheckinDatabaseAction checkinDatabaseAction = new CheckinDatabaseAction(getBimServer(), null, getInternalAccessMethod(), poid, getAuthorization(), model, comment, fileName, merge);
-			LongCheckinAction longAction = new LongCheckinAction(getBimServer(), username, userUsername, getAuthorization(), checkinDatabaseAction);
-			getBimServer().getLongActionManager().start(longAction);
-			if (sync) {
-				longAction.waitForCompletion();
-			}
-			return longAction.getProgressTopic().getKey().getId();
 		} catch (UserException e) {
 			throw e;
 		} catch (Throwable e) {
@@ -231,6 +300,14 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		}
 	}
 	
+	
+	@Override
+	public Long checkin(final Long poid, final String comment, Long deserializerOid, Long fileSize, String fileName, DataHandler dataHandler, Boolean merge, Boolean sync) throws ServerException, UserException {
+		Long topicId = initiateCheckin(poid, deserializerOid);
+		checkinInitiated(topicId, poid, comment, deserializerOid, fileSize, fileName, dataHandler, merge, sync);
+		return topicId;
+	}
+	
 	@Override
 	public Long checkinFromUrl(Long poid, String comment, Long deserializerOid, String fileName, String urlString, Boolean merge, Boolean sync) throws ServerException, UserException {
 		requireAuthenticationAndRunningServer();
@@ -238,7 +315,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		String username = "Unknown";
 		String userUsername = "Unknown";
 		try {
-			User user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), Query.getDefault());
+			User user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
 			username = user.getName();
 			userUsername = user.getUsername();
 			Path homeDirIncoming = getBimServer().getHomeDir().resolve("incoming");
@@ -265,19 +342,22 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 				fileName = dateFormat.format(new Date()) + "-" + fileName;
 			}
 			Path file = userDirIncoming.resolve(fileName);
-			DeserializerPluginConfiguration deserializerObject = session.get(StorePackage.eINSTANCE.getDeserializerPluginConfiguration(), deserializerOid, Query.getDefault());
-			if (deserializerObject == null) {
+			DeserializerPluginConfiguration deserializerPluginConfiguration = session.get(StorePackage.eINSTANCE.getDeserializerPluginConfiguration(), deserializerOid, OldQuery.getDefault());
+			if (deserializerPluginConfiguration == null) {
 				throw new UserException("Deserializer with oid " + deserializerOid + " not found");
 			}
 			OutputStream outputStream = Files.newOutputStream(file);
 			InputStream inputStream = new MultiplexingInputStream(input, outputStream);
-			Deserializer deserializer = getBimServer().getDeserializerFactory().createDeserializer(deserializerOid);
+			DeserializerPlugin deserializerPlugin = (DeserializerPlugin) getBimServer().getPluginManager().getPlugin(deserializerPluginConfiguration.getPluginDescriptor().getPluginClassName(), true);
+			ObjectType settings = deserializerPluginConfiguration.getSettings();
+
+			Deserializer deserializer = deserializerPlugin.createDeserializer(new PluginConfiguration(settings));
 			deserializer.init(getBimServer().getDatabase().getMetaDataManager().getPackageMetaData("ifc2x3tc1"));
 
 			IfcModelInterface model = deserializer.read(inputStream, fileName, 0, null);
 			
 			CheckinDatabaseAction checkinDatabaseAction = new CheckinDatabaseAction(getBimServer(), null, getInternalAccessMethod(), poid, getAuthorization(), model, comment, fileName, merge);
-			LongCheckinAction longAction = new LongCheckinAction(getBimServer(), username, userUsername, getAuthorization(), checkinDatabaseAction);
+			LongCheckinAction longAction = new LongCheckinAction(-1L, getBimServer(), username, userUsername, getAuthorization(), checkinDatabaseAction);
 			getBimServer().getLongActionManager().start(longAction);
 			if (sync) {
 				longAction.waitForCompletion();
@@ -462,8 +542,8 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		}
 	}
 	
-	public void cleanupLongAction(Long actionId) throws UserException, ServerException {
-		getBimServer().getLongActionManager().remove(actionId);
+	public void cleanupLongAction(Long topicId) throws UserException, ServerException {
+		getBimServer().getLongActionManager().remove(topicId);
 	}
 	
 	@Override
@@ -817,7 +897,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 			return null;
 		}
 		try {
-			User user = databaseSession.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), Query.getDefault());
+			User user = databaseSession.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
 			return getBimServer().getSConverter().convertToSObject(user);
 		} catch (Exception e) {
 			return handleException(e);
@@ -830,8 +910,8 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
 			SUser currentUser = getCurrentUser(session);
-			Revision revision1 = session.get(StorePackage.eINSTANCE.getRevision(), roid1, Query.getDefault());
-			Revision revision2 = session.get(StorePackage.eINSTANCE.getRevision(), roid2, Query.getDefault());
+			Revision revision1 = session.get(StorePackage.eINSTANCE.getRevision(), roid1, OldQuery.getDefault());
+			Revision revision2 = session.get(StorePackage.eINSTANCE.getRevision(), roid2, OldQuery.getDefault());
 			String senderName = currentUser.getName();
 			String senderAddress = currentUser.getUsername();
 			if (!senderAddress.contains("@") || !senderAddress.contains(".")) {
@@ -1136,7 +1216,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		requireAuthenticationAndRunningServer();
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			org.bimserver.models.store.Service externalProfile = session.get(StorePackage.eINSTANCE.getService(), soid, Query.getDefault());
+			org.bimserver.models.store.Service externalProfile = session.get(StorePackage.eINSTANCE.getService(), soid, OldQuery.getDefault());
 			return getBimServer().getSConverter().convertToSObject(externalProfile);
 		} catch (Exception e) {
 			return handleException(e);
@@ -1219,7 +1299,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		try {
 			SUser currentUser = getCurrentUser();
 			Condition condition = new AttributeCondition(StorePackage.eINSTANCE.getUser_Token(), new StringLiteral(currentUser.getToken()));
-			User user = session.querySingle(condition, User.class, Query.getDefault());
+			User user = session.querySingle(condition, User.class, OldQuery.getDefault());
 			if (user != null) {
 				for (InternalServicePluginConfiguration internalServicePluginConfiguration : user.getUserSettings().getServices()) {
 					if (serviceIdentifier.equals("" + internalServicePluginConfiguration.getOid())) {
@@ -1262,7 +1342,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 	public SFile getFile(Long fileId) throws ServerException, UserException {
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			org.bimserver.models.store.File file = (org.bimserver.models.store.File)session.get(StorePackage.eINSTANCE.getFile(), fileId, Query.getDefault());
+			org.bimserver.models.store.File file = (org.bimserver.models.store.File)session.get(StorePackage.eINSTANCE.getFile(), fileId, OldQuery.getDefault());
 			return getBimServer().getSConverter().convertToSObject(file);
 		} catch (Exception e) {
 			return handleException(e);
@@ -1289,7 +1369,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 	public void triggerNewExtendedData(Long edid, Long soid) throws ServerException, UserException {
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			ExtendedData extendedData = (ExtendedData)session.get(StorePackage.eINSTANCE.getExtendedData(), edid, Query.getDefault());
+			ExtendedData extendedData = (ExtendedData)session.get(StorePackage.eINSTANCE.getExtendedData(), edid, OldQuery.getDefault());
 			SExtendedDataAddedToRevision newExtendedData = new SExtendedDataAddedToRevision();
 			newExtendedData.setRevisionId(extendedData.getRevision().getOid());
 			newExtendedData.setExtendedDataId(edid);
@@ -1305,7 +1385,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 	public void triggerNewRevision(Long roid, Long soid) throws ServerException, UserException {
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			Revision revision = (Revision)session.get(StorePackage.eINSTANCE.getRevision(), roid, Query.getDefault());
+			Revision revision = (Revision)session.get(StorePackage.eINSTANCE.getRevision(), roid, OldQuery.getDefault());
 			getBimServer().getNotificationsManager().notify(new NewRevisionNotification(getBimServer(), revision.getProject().getOid(), revision.getOid(), soid));
 		} catch (Exception e) {
 			handleException(e);
@@ -1324,7 +1404,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 	public SUserSettings getUserSettings() throws ServerException, UserException {
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			User user = session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), Query.getDefault());
+			User user = session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
 			return getBimServer().getSConverter().convertToSObject(user.getUserSettings());
 		} catch (Exception e) {
 			return handleException(e);
@@ -1351,8 +1431,8 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
 			List<LogAction> logActions = new ArrayList<LogAction>();
-			User user = session.get(getAuthorization().getUoid(), Query.getDefault());
-			IfcModelInterface projectsModel = session.getAllOfType(StorePackage.eINSTANCE.getProject(), Query.getDefault());
+			User user = session.get(getAuthorization().getUoid(), OldQuery.getDefault());
+			IfcModelInterface projectsModel = session.getAllOfType(StorePackage.eINSTANCE.getProject(), OldQuery.getDefault());
 			logActions.addAll(user.getLogs());
 			for (IdEObject idEObject : projectsModel.getValues()) {
 				if (idEObject instanceof Project) {
@@ -1450,7 +1530,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		requireRealUserAuthentication();
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			Project project = session.get(poid, Query.getDefault());
+			Project project = session.get(poid, OldQuery.getDefault());
 			return getBimServer().getSConverter().convertToSListModelCheckerInstance(project.getModelCheckers());
 		} catch (Exception e) {
 			return handleException(e);
@@ -1464,7 +1544,7 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		requireRealUserAuthentication();
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			ModelCheckerInstance modelChecker = session.get(modelCheckerOid, Query.getDefault());
+			ModelCheckerInstance modelChecker = session.get(modelCheckerOid, OldQuery.getDefault());
 			AddModelCheckerToProjectDatabaseAction action = new AddModelCheckerToProjectDatabaseAction(session, getInternalAccessMethod(), poid, modelChecker, getAuthorization());
 			session.executeAndCommitAction(action);
 		} catch (Exception e) {
@@ -1541,6 +1621,34 @@ public class ServiceImpl extends GenericServiceImpl implements ServiceInterface 
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
 			BimDatabaseAction<Double> action = new GetVolumeDatabaseAction(getBimServer(), session, getInternalAccessMethod(), roid, oid, getAuthorization());
+			return session.executeAndCommitAction(action);
+		} catch (Exception e) {
+			return handleException(e);
+		} finally {
+			session.close();
+		}
+	}
+
+	@Override
+	public SGeometryInfo getGeometryInfo(Long roid, Long oid) throws UserException, ServerException {
+		requireAuthentication();
+		DatabaseSession session = getBimServer().getDatabase().createSession();
+		try {
+			BimDatabaseAction<SGeometryInfo> action = new GetGeometryInfoDatabaseAction(getBimServer(), session, getInternalAccessMethod(), roid, oid, getAuthorization());
+			return session.executeAndCommitAction(action);
+		} catch (Exception e) {
+			return handleException(e);
+		} finally {
+			session.close();
+		}
+	}
+
+	@Override
+	public Long getNrPrimitives(Long roid) throws ServerException, UserException {
+		requireAuthentication();
+		DatabaseSession session = getBimServer().getDatabase().createSession();
+		try {
+			BimDatabaseAction<Long> action = new GetNrPrimitivesDatabaseAction(getBimServer(), session, getInternalAccessMethod(), roid, getAuthorization());
 			return session.executeAndCommitAction(action);
 		} catch (Exception e) {
 			return handleException(e);

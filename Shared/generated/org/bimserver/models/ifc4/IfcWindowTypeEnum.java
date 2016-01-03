@@ -43,36 +43,6 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	NULL(0, "NULL", "NULL"),
 
 	/**
-	 * The '<em><b>LIGHTDOME</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #LIGHTDOME_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	LIGHTDOME(1, "LIGHTDOME", "LIGHTDOME"),
-
-	/**
-	 * The '<em><b>WINDOW</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #WINDOW_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	WINDOW(2, "WINDOW", "WINDOW"),
-
-	/**
-	 * The '<em><b>NOTDEFINED</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #NOTDEFINED_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	NOTDEFINED(3, "NOTDEFINED", "NOTDEFINED"),
-
-	/**
 	 * The '<em><b>SKYLIGHT</b></em>' literal object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -80,7 +50,23 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	SKYLIGHT(4, "SKYLIGHT", "SKYLIGHT"),
+	SKYLIGHT(1, "SKYLIGHT", "SKYLIGHT"), /**
+											* The '<em><b>NOTDEFINED</b></em>' literal object.
+											* <!-- begin-user-doc -->
+											* <!-- end-user-doc -->
+											* @see #NOTDEFINED_VALUE
+											* @generated
+											* @ordered
+											*/
+	NOTDEFINED(2, "NOTDEFINED", "NOTDEFINED"), /**
+												* The '<em><b>LIGHTDOME</b></em>' literal object.
+												* <!-- begin-user-doc -->
+												* <!-- end-user-doc -->
+												* @see #LIGHTDOME_VALUE
+												* @generated
+												* @ordered
+												*/
+	LIGHTDOME(3, "LIGHTDOME", "LIGHTDOME"),
 
 	/**
 	 * The '<em><b>USERDEFINED</b></em>' literal object.
@@ -90,7 +76,15 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	USERDEFINED(5, "USERDEFINED", "USERDEFINED");
+	USERDEFINED(4, "USERDEFINED", "USERDEFINED"), /**
+													* The '<em><b>WINDOW</b></em>' literal object.
+													* <!-- begin-user-doc -->
+													* <!-- end-user-doc -->
+													* @see #WINDOW_VALUE
+													* @generated
+													* @ordered
+													*/
+	WINDOW(5, "WINDOW", "WINDOW");
 
 	/**
 	 * The '<em><b>NULL</b></em>' literal value.
@@ -108,34 +102,19 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	public static final int NULL_VALUE = 0;
 
 	/**
-	 * The '<em><b>LIGHTDOME</b></em>' literal value.
+	 * The '<em><b>SKYLIGHT</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
-	 * If the meaning of '<em><b>LIGHTDOME</b></em>' literal object isn't clear,
+	 * If the meaning of '<em><b>SKYLIGHT</b></em>' literal object isn't clear,
 	 * there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
-	 * @see #LIGHTDOME
+	 * @see #SKYLIGHT
 	 * @model
 	 * @generated
 	 * @ordered
 	 */
-	public static final int LIGHTDOME_VALUE = 1;
-
-	/**
-	 * The '<em><b>WINDOW</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>WINDOW</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #WINDOW
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int WINDOW_VALUE = 2;
+	public static final int SKYLIGHT_VALUE = 1;
 
 	/**
 	 * The '<em><b>NOTDEFINED</b></em>' literal value.
@@ -150,22 +129,22 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int NOTDEFINED_VALUE = 3;
+	public static final int NOTDEFINED_VALUE = 2;
 
 	/**
-	 * The '<em><b>SKYLIGHT</b></em>' literal value.
+	 * The '<em><b>LIGHTDOME</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
-	 * If the meaning of '<em><b>SKYLIGHT</b></em>' literal object isn't clear,
+	 * If the meaning of '<em><b>LIGHTDOME</b></em>' literal object isn't clear,
 	 * there really should be more of a description here...
 	 * </p>
 	 * <!-- end-user-doc -->
-	 * @see #SKYLIGHT
+	 * @see #LIGHTDOME
 	 * @model
 	 * @generated
 	 * @ordered
 	 */
-	public static final int SKYLIGHT_VALUE = 4;
+	public static final int LIGHTDOME_VALUE = 3;
 
 	/**
 	 * The '<em><b>USERDEFINED</b></em>' literal value.
@@ -180,7 +159,22 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int USERDEFINED_VALUE = 5;
+	public static final int USERDEFINED_VALUE = 4;
+
+	/**
+	 * The '<em><b>WINDOW</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>WINDOW</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #WINDOW
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int WINDOW_VALUE = 5;
 
 	/**
 	 * An array of all the '<em><b>Ifc Window Type Enum</b></em>' enumerators.
@@ -188,7 +182,8 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private static final IfcWindowTypeEnum[] VALUES_ARRAY = new IfcWindowTypeEnum[] { NULL, LIGHTDOME, WINDOW, NOTDEFINED, SKYLIGHT, USERDEFINED, };
+	private static final IfcWindowTypeEnum[] VALUES_ARRAY = new IfcWindowTypeEnum[] { NULL, SKYLIGHT, NOTDEFINED,
+			LIGHTDOME, USERDEFINED, WINDOW, };
 
 	/**
 	 * A public read-only list of all the '<em><b>Ifc Window Type Enum</b></em>' enumerators.
@@ -202,6 +197,8 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Window Type Enum</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param literal the literal.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcWindowTypeEnum get(String literal) {
@@ -218,6 +215,8 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Window Type Enum</b></em>' literal with the specified name.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param name the name.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcWindowTypeEnum getByName(String name) {
@@ -234,22 +233,24 @@ public enum IfcWindowTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Window Type Enum</b></em>' literal with the specified integer value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param value the integer value.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcWindowTypeEnum get(int value) {
 		switch (value) {
 		case NULL_VALUE:
 			return NULL;
-		case LIGHTDOME_VALUE:
-			return LIGHTDOME;
-		case WINDOW_VALUE:
-			return WINDOW;
-		case NOTDEFINED_VALUE:
-			return NOTDEFINED;
 		case SKYLIGHT_VALUE:
 			return SKYLIGHT;
+		case NOTDEFINED_VALUE:
+			return NOTDEFINED;
+		case LIGHTDOME_VALUE:
+			return LIGHTDOME;
 		case USERDEFINED_VALUE:
 			return USERDEFINED;
+		case WINDOW_VALUE:
+			return WINDOW;
 		}
 		return null;
 	}

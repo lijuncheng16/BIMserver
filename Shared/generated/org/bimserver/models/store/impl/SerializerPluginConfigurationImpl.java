@@ -29,12 +29,13 @@ import org.eclipse.emf.ecore.EClass;
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
+ * </p>
  * <ul>
  *   <li>{@link org.bimserver.models.store.impl.SerializerPluginConfigurationImpl#getObjectIDM <em>Object IDM</em>}</li>
  *   <li>{@link org.bimserver.models.store.impl.SerializerPluginConfigurationImpl#getUserSettings <em>User Settings</em>}</li>
  *   <li>{@link org.bimserver.models.store.impl.SerializerPluginConfigurationImpl#getRenderEngine <em>Render Engine</em>}</li>
+ *   <li>{@link org.bimserver.models.store.impl.SerializerPluginConfigurationImpl#isStreaming <em>Streaming</em>}</li>
  * </ul>
- * </p>
  *
  * @generated
  */
@@ -110,6 +111,24 @@ public class SerializerPluginConfigurationImpl extends PluginConfigurationImpl i
 	 */
 	public void setRenderEngine(RenderEnginePluginConfiguration newRenderEngine) {
 		eSet(StorePackage.Literals.SERIALIZER_PLUGIN_CONFIGURATION__RENDER_ENGINE, newRenderEngine);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public boolean isStreaming() {
+		return (Boolean) eGet(StorePackage.Literals.SERIALIZER_PLUGIN_CONFIGURATION__STREAMING, true);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setStreaming(boolean newStreaming) {
+		eSet(StorePackage.Literals.SERIALIZER_PLUGIN_CONFIGURATION__STREAMING, newStreaming);
 	}
 
 } //SerializerPluginConfigurationImpl

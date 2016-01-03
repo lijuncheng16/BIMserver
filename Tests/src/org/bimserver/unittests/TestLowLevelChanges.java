@@ -31,8 +31,8 @@ import javax.activation.DataHandler;
 import org.apache.commons.io.FileUtils;
 import org.bimserver.BimServer;
 import org.bimserver.BimServerConfig;
+import org.bimserver.BimserverDatabaseException;
 import org.bimserver.LocalDevPluginLoader;
-import org.bimserver.database.BimserverDatabaseException;
 import org.bimserver.database.DatabaseRestartRequiredException;
 import org.bimserver.database.berkeley.DatabaseInitException;
 import org.bimserver.emf.IdEObject;
@@ -333,8 +333,8 @@ public class TestLowLevelChanges {
 	private IfcModelInterface getSingleRevision(long roid) throws ServiceException, DeserializeException, IOException {
 		SRevision revision = bimsie1ServiceInterface.getRevision(roid);
 		SSerializerPluginConfiguration serializerByContentType = bimsie1Interface.getSerializerByContentType("application/ifc");
-		long downloadId = bimsie1Interface.download(revision.getOid(), serializerByContentType.getOid(), true, true);
-		SDownloadResult downloadData = bimsie1Interface.getDownloadData(downloadId);
+		long topicId = bimsie1Interface.download(revision.getOid(), serializerByContentType.getOid(), true, true);
+		SDownloadResult downloadData = bimsie1Interface.getDownloadData(topicId);
 		DataHandler dataHandler = downloadData.getFile();
 		try {
 			DeserializerPlugin deserializerPlugin = pluginManager.getFirstDeserializer("ifc", Schema.IFC2X3TC1, true);

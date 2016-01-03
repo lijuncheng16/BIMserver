@@ -63,16 +63,6 @@ public enum IfcDiscreteAccessoryTypeEnum implements Enumerator {
 	BRACKET(2, "BRACKET", "BRACKET"),
 
 	/**
-	 * The '<em><b>USERDEFINED</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #USERDEFINED_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	USERDEFINED(3, "USERDEFINED", "USERDEFINED"),
-
-	/**
 	 * The '<em><b>ANCHORPLATE</b></em>' literal object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -80,7 +70,15 @@ public enum IfcDiscreteAccessoryTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	ANCHORPLATE(4, "ANCHORPLATE", "ANCHORPLATE"),
+	ANCHORPLATE(3, "ANCHORPLATE", "ANCHORPLATE"), /**
+													* The '<em><b>USERDEFINED</b></em>' literal object.
+													* <!-- begin-user-doc -->
+													* <!-- end-user-doc -->
+													* @see #USERDEFINED_VALUE
+													* @generated
+													* @ordered
+													*/
+	USERDEFINED(4, "USERDEFINED", "USERDEFINED"),
 
 	/**
 	 * The '<em><b>SHOE</b></em>' literal object.
@@ -138,21 +136,6 @@ public enum IfcDiscreteAccessoryTypeEnum implements Enumerator {
 	public static final int BRACKET_VALUE = 2;
 
 	/**
-	 * The '<em><b>USERDEFINED</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>USERDEFINED</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #USERDEFINED
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int USERDEFINED_VALUE = 3;
-
-	/**
 	 * The '<em><b>ANCHORPLATE</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
@@ -165,7 +148,22 @@ public enum IfcDiscreteAccessoryTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int ANCHORPLATE_VALUE = 4;
+	public static final int ANCHORPLATE_VALUE = 3;
+
+	/**
+	 * The '<em><b>USERDEFINED</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>USERDEFINED</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #USERDEFINED
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int USERDEFINED_VALUE = 4;
 
 	/**
 	 * The '<em><b>SHOE</b></em>' literal value.
@@ -188,7 +186,8 @@ public enum IfcDiscreteAccessoryTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private static final IfcDiscreteAccessoryTypeEnum[] VALUES_ARRAY = new IfcDiscreteAccessoryTypeEnum[] { NULL, NOTDEFINED, BRACKET, USERDEFINED, ANCHORPLATE, SHOE, };
+	private static final IfcDiscreteAccessoryTypeEnum[] VALUES_ARRAY = new IfcDiscreteAccessoryTypeEnum[] { NULL,
+			NOTDEFINED, BRACKET, ANCHORPLATE, USERDEFINED, SHOE, };
 
 	/**
 	 * A public read-only list of all the '<em><b>Ifc Discrete Accessory Type Enum</b></em>' enumerators.
@@ -196,12 +195,15 @@ public enum IfcDiscreteAccessoryTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public static final List<IfcDiscreteAccessoryTypeEnum> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
+	public static final List<IfcDiscreteAccessoryTypeEnum> VALUES = Collections
+			.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
 	/**
 	 * Returns the '<em><b>Ifc Discrete Accessory Type Enum</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param literal the literal.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcDiscreteAccessoryTypeEnum get(String literal) {
@@ -218,6 +220,8 @@ public enum IfcDiscreteAccessoryTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Discrete Accessory Type Enum</b></em>' literal with the specified name.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param name the name.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcDiscreteAccessoryTypeEnum getByName(String name) {
@@ -234,6 +238,8 @@ public enum IfcDiscreteAccessoryTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Discrete Accessory Type Enum</b></em>' literal with the specified integer value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param value the integer value.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcDiscreteAccessoryTypeEnum get(int value) {
@@ -244,10 +250,10 @@ public enum IfcDiscreteAccessoryTypeEnum implements Enumerator {
 			return NOTDEFINED;
 		case BRACKET_VALUE:
 			return BRACKET;
-		case USERDEFINED_VALUE:
-			return USERDEFINED;
 		case ANCHORPLATE_VALUE:
 			return ANCHORPLATE;
+		case USERDEFINED_VALUE:
+			return USERDEFINED;
 		case SHOE_VALUE:
 			return SHOE;
 		}

@@ -72,6 +72,10 @@ public class Bimsie1ServiceInterfaceAdaptor implements org.bimserver.shared.inte
 		return null;
 	}
 	
+	public java.lang.Long downloadByNewJsonQuery(java.util.Set<java.lang.Long> roids, java.lang.String query, java.lang.Long serializerOid, java.lang.Boolean sync) throws UserException, ServerException {
+		return null;
+	}
+	
 	public java.lang.Long downloadByOids(java.util.Set<java.lang.Long> roids, java.util.Set<java.lang.Long> oids, java.lang.Long serializerOid, java.lang.Boolean sync, java.lang.Boolean deep) throws UserException, ServerException {
 		return null;
 	}
@@ -112,7 +116,7 @@ public class Bimsie1ServiceInterfaceAdaptor implements org.bimserver.shared.inte
 		return null;
 	}
 	
-	public org.bimserver.interfaces.objects.SDownloadResult getDownloadData(java.lang.Long actionId) throws UserException, ServerException {
+	public org.bimserver.interfaces.objects.SDownloadResult getDownloadData(java.lang.Long topicId) throws UserException, ServerException {
 		return null;
 	}
 	
@@ -172,7 +176,11 @@ public class Bimsie1ServiceInterfaceAdaptor implements org.bimserver.shared.inte
 		return null;
 	}
 	
-	public void terminateLongRunningAction(java.lang.Long actionId) throws UserException, ServerException {
+	public java.lang.Long initiateCheckin(java.lang.Long poid, java.lang.Long deserializerOid) throws UserException, ServerException {
+		return null;
+	}
+	
+	public void terminateLongRunningAction(java.lang.Long topicId) throws UserException, ServerException {
 	}
 	
 	public java.lang.Boolean undeleteProject(java.lang.Long poid) throws UserException, ServerException {

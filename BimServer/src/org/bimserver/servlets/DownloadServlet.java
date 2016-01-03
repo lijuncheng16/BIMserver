@@ -19,7 +19,6 @@ package org.bimserver.servlets;
 
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.Date;
@@ -36,7 +35,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.bimserver.BimServer;
-import org.bimserver.cache.FileInputStreamDataSource;
+import org.bimserver.BimserverDatabaseException;
 import org.bimserver.interfaces.objects.SCompareType;
 import org.bimserver.interfaces.objects.SDownloadResult;
 import org.bimserver.interfaces.objects.SExtendedData;
@@ -49,7 +48,7 @@ import org.bimserver.models.store.LongActionState;
 import org.bimserver.models.store.StoreFactory;
 import org.bimserver.notifications.ProgressTopic;
 import org.bimserver.plugins.PluginConfiguration;
-import org.bimserver.plugins.serializers.EmfSerializerDataSource;
+import org.bimserver.plugins.serializers.ExtendedDataSource;
 import org.bimserver.plugins.serializers.ProgressReporter;
 import org.bimserver.plugins.serializers.SerializerException;
 import org.bimserver.plugins.serializers.SerializerPlugin;
@@ -141,10 +140,7 @@ public class DownloadServlet extends SubServlet {
 				} else {
 					serializer = serviceMap.getBimsie1ServiceInterface().getSerializerByName(request.getParameter("serializerName"));
 				}
-				long downloadId = -1;
-				if (request.getParameter("longActionId") != null) {
-					downloadId = Integer.parseInt(request.getParameter("longActionId"));
-				} else if (request.getParameter("multiple") != null) {
+				if (request.getParameter("multiple") != null) {
 					Set<Long> roids = new HashSet<Long>();
 					for (Object key : request.getParameterMap().keySet()) {
 						String keyString = (String) key;
@@ -154,12 +150,14 @@ public class DownloadServlet extends SubServlet {
 							}
 						}
 					}
-					downloadId = serviceMap.getBimsie1ServiceInterface().downloadRevisions(roids, serializer.getOid(), true);
+					topicId = serviceMap.getBimsie1ServiceInterface().downloadRevisions(roids, serializer.getOid(), true);
 				} else if (request.getParameter("compare") != null) {
 					SCompareType sCompareType = SCompareType.valueOf(request.getParameter("type"));
 					Long roid1 = Long.parseLong(request.getParameter("roid1"));
 					Long roid2 = Long.parseLong(request.getParameter("roid2"));
-					downloadId = serviceMap.getServiceInterface().downloadCompareResults(serializer.getOid(), roid1, roid2, Long.valueOf(request.getParameter("mcid")), sCompareType, true);
+					topicId = serviceMap.getServiceInterface().downloadCompareResults(serializer.getOid(), roid1, roid2, Long.valueOf(request.getParameter("mcid")), sCompareType, true);
+				} else if (request.getParameter("topicId") != null) {
+					topicId = Long.parseLong(request.getParameter("topicId"));
 				} else {
 					long roid = -1;
 					if (request.getParameter("roid") == null) {
@@ -180,7 +178,7 @@ public class DownloadServlet extends SubServlet {
 						roid = Long.parseLong(request.getParameter("roid"));
 					}
 					if (request.getParameter("checkout") != null) {
-						downloadId = serviceMap.getBimsie1ServiceInterface().checkout(roid, serializer.getOid(), true);
+						topicId = serviceMap.getBimsie1ServiceInterface().checkout(roid, serializer.getOid(), true);
 					} else {
 						if (request.getParameter("classses") != null) {
 							Set<String> classes = new HashSet<String>();
@@ -189,7 +187,7 @@ public class DownloadServlet extends SubServlet {
 							}
 							Set<Long> roids = new HashSet<Long>();
 							roids.add(roid);
-							downloadId = serviceMap.getBimsie1ServiceInterface().downloadByTypes(roids, "ifc2x3tc1", classes, serializer.getOid(), false, true, true, true);
+							topicId = serviceMap.getBimsie1ServiceInterface().downloadByTypes(roids, "ifc2x3tc1", classes, serializer.getOid(), false, true, true, true);
 						} else if (request.getParameter("oids") != null) {
 							Set<Long> oids = new HashSet<Long>();
 							for (String oidString : request.getParameter("oids").split(";")) {
@@ -197,7 +195,7 @@ public class DownloadServlet extends SubServlet {
 							}
 							Set<Long> roids = new HashSet<Long>();
 							roids.add(roid);
-							downloadId = serviceMap.getBimsie1ServiceInterface().downloadByOids(roids, oids, serializer.getOid(), true, true);
+							topicId = serviceMap.getBimsie1ServiceInterface().downloadByOids(roids, oids, serializer.getOid(), true, true);
 						} else if (request.getParameter("guids") != null) {
 							Set<String> guids = new HashSet<String>();
 							for (String guid : request.getParameter("guids").split(";")) {
@@ -205,19 +203,19 @@ public class DownloadServlet extends SubServlet {
 							}
 							Set<Long> roids = new HashSet<Long>();
 							roids.add(roid);
-							downloadId = serviceMap.getBimsie1ServiceInterface().downloadByGuids(roids, guids, serializer.getOid(), false, true);
+							topicId = serviceMap.getBimsie1ServiceInterface().downloadByGuids(roids, guids, serializer.getOid(), false, true);
 						} else {
-							downloadId = serviceMap.getBimsie1ServiceInterface().download(roid, serializer.getOid(), true, true);
+							topicId = serviceMap.getBimsie1ServiceInterface().download(roid, serializer.getOid(), true, true);
 						}
 					}
 				}
-				if (downloadId == -1) {
-					response.getWriter().println("No valid download");
+				if (topicId == -1) {
+					response.getWriter().println("No valid topicId");
 					return;
 				}
-				SDownloadResult checkoutResult = serviceMap.getBimsie1ServiceInterface().getDownloadData(downloadId);
+				SDownloadResult checkoutResult = serviceMap.getBimsie1ServiceInterface().getDownloadData(topicId);
 				if (checkoutResult == null) {
-					LOGGER.error("Invalid downloadId: " + downloadId);
+					LOGGER.error("Invalid topicId: " + topicId);
 				} else {
 					DataSource dataSource = checkoutResult.getFile().getDataSource();
 					PluginConfiguration pluginConfiguration = new PluginConfiguration(serviceMap.getPluginInterface().getPluginSettings(serializer.getOid()));
@@ -268,8 +266,7 @@ public class DownloadServlet extends SubServlet {
 					try {
 						if (zip) {
 							if (pluginConfiguration.getString("ZipExtension") != null) {
-								response.setHeader("Content-Disposition",
-										"inline; filename=\"" + dataSource.getName() + "." + pluginConfiguration.getString(SerializerPlugin.ZIP_EXTENSION) + "\"");
+								response.setHeader("Content-Disposition", "inline; filename=\"" + dataSource.getName() + "." + pluginConfiguration.getString(SerializerPlugin.ZIP_EXTENSION) + "\"");
 							} else {
 								response.setHeader("Content-Disposition", "inline; filename=\"" + dataSource.getName() + ".zip" + "\"");
 							}
@@ -278,14 +275,8 @@ public class DownloadServlet extends SubServlet {
 							String nameInZip = dataSource.getName() + "." + pluginConfiguration.getString(SerializerPlugin.EXTENSION);
 							ZipOutputStream zipOutputStream = new ZipOutputStream(outputStream);
 							zipOutputStream.putNextEntry(new ZipEntry(nameInZip));
-							if (dataSource instanceof FileInputStreamDataSource) {
-								FileInputStreamDataSource fileInputStreamDataSource = (FileInputStreamDataSource) dataSource;
-								InputStream inputStream = fileInputStreamDataSource.getInputStream();
-								copy(inputStream, zipOutputStream, progressReporter, fileInputStreamDataSource.size());
-								inputStream.close();
-							} else {
-								((EmfSerializerDataSource) dataSource).writeToOutputStream(zipOutputStream, progressReporter);
-							}
+							
+							processDataSource(zipOutputStream, dataSource, progressReporter);
 							try {
 								zipOutputStream.finish();
 							} catch (IOException e) {
@@ -294,19 +285,11 @@ public class DownloadServlet extends SubServlet {
 						} else {
 							if (request.getParameter("mime") == null) {
 								response.setContentType(pluginConfiguration.getString(SerializerPlugin.CONTENT_TYPE));
-								response.setHeader("Content-Disposition",
-										"inline; filename=\"" + dataSource.getName() + "." + pluginConfiguration.getString(SerializerPlugin.EXTENSION) + "\"");
+								response.setHeader("Content-Disposition", "inline; filename=\"" + dataSource.getName() + "." + pluginConfiguration.getString(SerializerPlugin.EXTENSION) + "\"");
 							} else {
 								response.setContentType(request.getParameter("mime"));
 							}
-							if (dataSource instanceof FileInputStreamDataSource) {
-								FileInputStreamDataSource fileInputStreamDataSource = (FileInputStreamDataSource) dataSource;
-								InputStream inputStream = fileInputStreamDataSource.getInputStream();
-								copy(inputStream, outputStream, progressReporter, fileInputStreamDataSource.size());
-								inputStream.close();
-							} else {
-								((EmfSerializerDataSource) dataSource).writeToOutputStream(outputStream, progressReporter);
-							}
+							processDataSource(outputStream, dataSource, progressReporter);
 						}
 					} catch (SerializerException s) {
 						LOGGER.error("", s);
@@ -338,16 +321,12 @@ public class DownloadServlet extends SubServlet {
 			LOGGER.error("", e);
 		}
 	}
-	
-	private long copy(InputStream input, OutputStream output, ProgressReporter progressReporter, long totalSize) throws IOException {
-		byte[] buffer = new byte[4096];
-        long count = 0;
-        int n = 0;
-        while (-1 != (n = input.read(buffer))) {
-            output.write(buffer, 0, n);
-            count += n;
-            progressReporter.update(count, totalSize);
-        }
-        return count;
+
+	private void processDataSource(OutputStream outputStream, DataSource dataSource, ProgressReporter progressReporter) throws IOException, SerializerException, BimserverDatabaseException {
+		if (dataSource instanceof ExtendedDataSource) {
+			((ExtendedDataSource) dataSource).writeToOutputStream(outputStream, progressReporter);
+		} else {
+			throw new SerializerException("Unsupported datasource type: " + dataSource);
+		}
 	}
 }

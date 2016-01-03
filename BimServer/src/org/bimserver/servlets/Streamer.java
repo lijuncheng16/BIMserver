@@ -28,9 +28,12 @@ import java.util.GregorianCalendar;
 import org.apache.commons.io.output.NullWriter;
 import org.bimserver.BimServer;
 import org.bimserver.endpoints.EndPoint;
+import org.bimserver.longaction.LongAction;
 import org.bimserver.longaction.LongDownloadOrCheckoutAction;
+import org.bimserver.longaction.LongStreamingDownloadAction;
 import org.bimserver.models.log.AccessMethod;
-import org.bimserver.plugins.serializers.MessagingSerializer;
+import org.bimserver.plugins.serializers.SerializerException;
+import org.bimserver.plugins.serializers.Writer;
 import org.bimserver.shared.StreamingSocketInterface;
 import org.bimserver.shared.exceptions.ServerException;
 import org.bimserver.shared.exceptions.UserException;
@@ -78,45 +81,54 @@ public class Streamer implements EndPoint {
 		} else if (request.has("action")) {
 			if (request.get("action").getAsString().equals("download")) {
 				final int topicId = request.get("topicId").getAsInt();
-					final long downloadId = request.get("longActionId").getAsLong();
-					Thread thread = new Thread(){
-						@Override
-						public void run() {
-							try {
-								LongDownloadOrCheckoutAction longAction = (LongDownloadOrCheckoutAction) bimServer.getLongActionManager().getLongAction(downloadId);
-								MessagingSerializer messagingSerializer = longAction.getMessagingSerializer();
-								boolean writeMessage = true;
-								int counter = 0;
-								long bytes = 0;
-								do {
-									ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-									DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
-									dataOutputStream.writeInt(topicId);
-									dataOutputStream.writeInt(0); // fake nr messages, to be replaced later
-									writeMessage = messagingSerializer.writeMessage(byteArrayOutputStream, null);
-									int messages = 1;
-									while (byteArrayOutputStream.size() < BUFFER_SIZE && writeMessage) {
-										messages++;
-										writeMessage = messagingSerializer.writeMessage(byteArrayOutputStream, null);
-									}
-									byte[] byteArray = byteArrayOutputStream.toByteArray();
-									ByteBuffer byteBuffer = ByteBuffer.wrap(byteArray);
-									byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
-									byteBuffer.putInt(4, messages);
-									if (byteArrayOutputStream.size() > 8) {
-										bytes += byteArray.length;
-										streamingSocketInterface.send(byteArray, 0, byteArray.length);
-										counter++;
-									}
-								} while (writeMessage);
-								LOGGER.info(counter + " messages written " + Formatters.bytesToString(bytes));
-							} catch (IOException e) {
-								LOGGER.error("", e);
+				Thread thread = new Thread(){
+					@Override
+					public void run() {
+						try {
+							LongAction<?> longAction = bimServer.getLongActionManager().getLongAction(topicId);
+							Writer writer = null;
+							if (longAction instanceof LongStreamingDownloadAction) {
+								LongStreamingDownloadAction longStreamingDownloadAction = (LongStreamingDownloadAction)longAction;
+								writer = longStreamingDownloadAction.getMessagingStreamingSerializer();
+							} else {
+								
+								LongDownloadOrCheckoutAction longDownloadAction = (LongDownloadOrCheckoutAction) longAction;
+								writer = longDownloadAction.getMessagingSerializer();
 							}
+							boolean writeMessage = true;
+							int counter = 0;
+							long bytes = 0;
+							long start = System.nanoTime();
+							do {
+								ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+								DataOutputStream dataOutputStream = new DataOutputStream(byteArrayOutputStream);
+								dataOutputStream.writeInt(topicId);
+								dataOutputStream.writeInt(0); // fake nr messages, to be replaced later
+								writeMessage = writer.writeMessage(byteArrayOutputStream, null);
+								int messages = 1;
+								while (byteArrayOutputStream.size() < BUFFER_SIZE && writeMessage) {
+									messages++;
+									writeMessage = writer.writeMessage(byteArrayOutputStream, null);
+								}
+								byte[] byteArray = byteArrayOutputStream.toByteArray();
+								ByteBuffer byteBuffer = ByteBuffer.wrap(byteArray);
+								byteBuffer.order(ByteOrder.LITTLE_ENDIAN);
+								byteBuffer.putInt(4, messages);
+								if (byteArrayOutputStream.size() > 8) {
+									bytes += byteArray.length;
+									streamingSocketInterface.send(byteArray, 0, byteArray.length);
+									counter++;
+								}
+							} while (writeMessage);
+							long end = System.nanoTime();
+							LOGGER.info(counter + " messages written " + Formatters.bytesToString(bytes) + " in " + ((end - start) / 1000000) + " ms");
+						} catch (IOException | SerializerException e) {
+							LOGGER.error("", e);
 						}
-					};
-					thread.setName("Streamer " + downloadId);
-					thread.start();
+					}
+				};
+				thread.setName("Streamer " + topicId);
+				thread.start();
 			}
 		} else if (request.has("token")) {
 			String token = request.get("token").getAsString();
@@ -145,6 +157,7 @@ public class Streamer implements EndPoint {
 	}
 
 	public void onClose() {
+		LOGGER.info("onClose, unregistering endpoint " + this.getEndPointId());
 		bimServer.getEndPointManager().unregister(this);
 	}
 

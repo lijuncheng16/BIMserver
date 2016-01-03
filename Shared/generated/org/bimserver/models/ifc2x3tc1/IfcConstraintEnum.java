@@ -43,16 +43,6 @@ public enum IfcConstraintEnum implements Enumerator {
 	NULL(0, "NULL", "NULL"),
 
 	/**
-	 * The '<em><b>ADVISORY</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #ADVISORY_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	ADVISORY(1, "ADVISORY", "ADVISORY"),
-
-	/**
 	 * The '<em><b>NOTDEFINED</b></em>' literal object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -60,7 +50,15 @@ public enum IfcConstraintEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	NOTDEFINED(2, "NOTDEFINED", "NOTDEFINED"),
+	NOTDEFINED(1, "NOTDEFINED", "NOTDEFINED"), /**
+												* The '<em><b>ADVISORY</b></em>' literal object.
+												* <!-- begin-user-doc -->
+												* <!-- end-user-doc -->
+												* @see #ADVISORY_VALUE
+												* @generated
+												* @ordered
+												*/
+	ADVISORY(2, "ADVISORY", "ADVISORY"),
 
 	/**
 	 * The '<em><b>HARD</b></em>' literal object.
@@ -108,21 +106,6 @@ public enum IfcConstraintEnum implements Enumerator {
 	public static final int NULL_VALUE = 0;
 
 	/**
-	 * The '<em><b>ADVISORY</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>ADVISORY</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #ADVISORY
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int ADVISORY_VALUE = 1;
-
-	/**
 	 * The '<em><b>NOTDEFINED</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
@@ -135,7 +118,22 @@ public enum IfcConstraintEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int NOTDEFINED_VALUE = 2;
+	public static final int NOTDEFINED_VALUE = 1;
+
+	/**
+	 * The '<em><b>ADVISORY</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>ADVISORY</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #ADVISORY
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int ADVISORY_VALUE = 2;
 
 	/**
 	 * The '<em><b>HARD</b></em>' literal value.
@@ -188,7 +186,8 @@ public enum IfcConstraintEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private static final IfcConstraintEnum[] VALUES_ARRAY = new IfcConstraintEnum[] { NULL, ADVISORY, NOTDEFINED, HARD, USERDEFINED, SOFT, };
+	private static final IfcConstraintEnum[] VALUES_ARRAY = new IfcConstraintEnum[] { NULL, NOTDEFINED, ADVISORY, HARD,
+			USERDEFINED, SOFT, };
 
 	/**
 	 * A public read-only list of all the '<em><b>Ifc Constraint Enum</b></em>' enumerators.
@@ -202,6 +201,8 @@ public enum IfcConstraintEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Constraint Enum</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param literal the literal.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcConstraintEnum get(String literal) {
@@ -218,6 +219,8 @@ public enum IfcConstraintEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Constraint Enum</b></em>' literal with the specified name.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param name the name.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcConstraintEnum getByName(String name) {
@@ -234,16 +237,18 @@ public enum IfcConstraintEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Constraint Enum</b></em>' literal with the specified integer value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param value the integer value.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcConstraintEnum get(int value) {
 		switch (value) {
 		case NULL_VALUE:
 			return NULL;
-		case ADVISORY_VALUE:
-			return ADVISORY;
 		case NOTDEFINED_VALUE:
 			return NOTDEFINED;
+		case ADVISORY_VALUE:
+			return ADVISORY;
 		case HARD_VALUE:
 			return HARD;
 		case USERDEFINED_VALUE:

@@ -39,17 +39,34 @@ public class Step0013 extends Migration {
 		
 		schema.createEPackage("geometry");
 		
+		EClass concreteRevisionClass = schema.getEClass("store", "ConcreteRevision");
+		
 		EClass geometryInfo = schema.createEClass("geometry", "GeometryInfo");
 		EClass vector3f = schema.createEClass("geometry", "Vector3f");
 		schema.createEAttribute(vector3f, "x", EcorePackage.eINSTANCE.getEFloat(), Multiplicity.SINGLE);
 		schema.createEAttribute(vector3f, "y", EcorePackage.eINSTANCE.getEFloat(), Multiplicity.SINGLE);
 		schema.createEAttribute(vector3f, "z", EcorePackage.eINSTANCE.getEFloat(), Multiplicity.SINGLE);
-		EReference min = schema.createEReference(geometryInfo, "minBounds", vector3f, Multiplicity.SINGLE);
-		min.getEAnnotations().add(createEmbedsReferenceAnnotation());
-		min.getEAnnotations().add(createHiddenAnnotation());
-		EReference max = schema.createEReference(geometryInfo, "maxBounds", vector3f, Multiplicity.SINGLE);
-		max.getEAnnotations().add(createEmbedsReferenceAnnotation());
-		max.getEAnnotations().add(createHiddenAnnotation());
+
+		EReference geometryInfoMinBounds = schema.createEReference(geometryInfo, "minBounds", vector3f, Multiplicity.SINGLE);
+		geometryInfoMinBounds.getEAnnotations().add(createDbEmbedReferenceAnnotation());
+		geometryInfoMinBounds.getEAnnotations().add(createEmbedsReferenceAnnotation());
+		geometryInfoMinBounds.getEAnnotations().add(createHiddenAnnotation());
+		
+		EReference geometryInfoMaxBounds = schema.createEReference(geometryInfo, "maxBounds", vector3f, Multiplicity.SINGLE);
+		geometryInfoMaxBounds.getEAnnotations().add(createDbEmbedReferenceAnnotation());
+		geometryInfoMaxBounds.getEAnnotations().add(createEmbedsReferenceAnnotation());
+		geometryInfoMaxBounds.getEAnnotations().add(createHiddenAnnotation());
+
+		EReference concreteRevisionMinBounds = schema.createEReference(concreteRevisionClass, "minBounds", vector3f, Multiplicity.SINGLE);
+		concreteRevisionMinBounds.getEAnnotations().add(createDbEmbedReferenceAnnotation());
+		concreteRevisionMinBounds.getEAnnotations().add(createEmbedsReferenceAnnotation());
+		concreteRevisionMinBounds.getEAnnotations().add(createHiddenAnnotation());
+
+		EReference concreteRevisionMaxBounds = schema.createEReference(concreteRevisionClass, "maxBounds", vector3f, Multiplicity.SINGLE);
+		concreteRevisionMaxBounds.getEAnnotations().add(createDbEmbedReferenceAnnotation());
+		concreteRevisionMaxBounds.getEAnnotations().add(createEmbedsReferenceAnnotation());
+		concreteRevisionMaxBounds.getEAnnotations().add(createHiddenAnnotation());
+		
 		vector3f.getEAnnotations().add(createHiddenAnnotation());
 		geometryInfo.getEAnnotations().add(createHiddenAnnotation());
 		schema.createEAttribute(geometryInfo, "startVertex", EcorePackage.eINSTANCE.getEIntegerObject(), Multiplicity.SINGLE);
@@ -67,15 +84,13 @@ public class Step0013 extends Migration {
 
 		EClass ifcProductIfc2x3tc1 = schema.getEClass("ifc2x3tc1", "IfcProduct");
 		EClass ifcProductIfc4 = schema.getEClass("ifc4", "IfcProduct");
-		schema.createEReference(ifcProductIfc2x3tc1, "geometry", geometryInfo, Multiplicity.SINGLE).getEAnnotations().add(createHiddenAnnotation());
-		schema.createEReference(ifcProductIfc4, "geometry", geometryInfo, Multiplicity.SINGLE).getEAnnotations().add(createHiddenAnnotation());
+		EReference ifc2x3Geometry = schema.createEReference(ifcProductIfc2x3tc1, "geometry", geometryInfo, Multiplicity.SINGLE);
+		ifc2x3Geometry.setUnsettable(true);
+		ifc2x3Geometry.getEAnnotations().add(createHiddenAnnotation());
+		EReference ifc4Geometry = schema.createEReference(ifcProductIfc4, "geometry", geometryInfo, Multiplicity.SINGLE);
+		ifc4Geometry.setUnsettable(true);
+		ifc4Geometry.getEAnnotations().add(createHiddenAnnotation());
 		
-		EClass geometryInstance = schema.createEClass("geometry", "GeometryInstance");
-		schema.createEReference(geometryInstance, "data", schema.getEClass("geometry", "GeometryData"), Multiplicity.SINGLE);
-		schema.createEAttribute(geometryInstance, "transformation", EcorePackage.eINSTANCE.getEByteArray(), Multiplicity.SINGLE);
-		geometryInstance.getEAnnotations().add(createHiddenAnnotation());
-		
-		schema.createEReference(schema.getEClass("geometry", "GeometryInfo"), "instance", geometryInstance, Multiplicity.SINGLE);
 		schema.createEAttribute(geometryData, "materials", EcorePackage.eINSTANCE.getEByteArray());
 		schema.createEAttribute(geometryData, "materialIndices", EcorePackage.eINSTANCE.getEByteArray());
 		schema.createEAttribute(geometryInfo, "transformation", EcorePackage.eINSTANCE.getEByteArray(), Multiplicity.SINGLE);

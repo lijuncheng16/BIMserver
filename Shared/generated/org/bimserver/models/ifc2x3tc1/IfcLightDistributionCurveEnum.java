@@ -63,16 +63,6 @@ public enum IfcLightDistributionCurveEnum implements Enumerator {
 	TYPE_C(2, "TYPE_C", "TYPE_C"),
 
 	/**
-	 * The '<em><b>TYPE B</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #TYPE_B_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	TYPE_B(3, "TYPE_B", "TYPE_B"),
-
-	/**
 	 * The '<em><b>TYPE A</b></em>' literal object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -80,7 +70,15 @@ public enum IfcLightDistributionCurveEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	TYPE_A(4, "TYPE_A", "TYPE_A");
+	TYPE_A(3, "TYPE_A", "TYPE_A"), /**
+									* The '<em><b>TYPE B</b></em>' literal object.
+									* <!-- begin-user-doc -->
+									* <!-- end-user-doc -->
+									* @see #TYPE_B_VALUE
+									* @generated
+									* @ordered
+									*/
+	TYPE_B(4, "TYPE_B", "TYPE_B");
 
 	/**
 	 * The '<em><b>NULL</b></em>' literal value.
@@ -128,21 +126,6 @@ public enum IfcLightDistributionCurveEnum implements Enumerator {
 	public static final int TYPE_C_VALUE = 2;
 
 	/**
-	 * The '<em><b>TYPE B</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>TYPE B</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #TYPE_B
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int TYPE_B_VALUE = 3;
-
-	/**
 	 * The '<em><b>TYPE A</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
@@ -155,7 +138,22 @@ public enum IfcLightDistributionCurveEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int TYPE_A_VALUE = 4;
+	public static final int TYPE_A_VALUE = 3;
+
+	/**
+	 * The '<em><b>TYPE B</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>TYPE B</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #TYPE_B
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int TYPE_B_VALUE = 4;
 
 	/**
 	 * An array of all the '<em><b>Ifc Light Distribution Curve Enum</b></em>' enumerators.
@@ -163,7 +161,8 @@ public enum IfcLightDistributionCurveEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private static final IfcLightDistributionCurveEnum[] VALUES_ARRAY = new IfcLightDistributionCurveEnum[] { NULL, NOTDEFINED, TYPE_C, TYPE_B, TYPE_A, };
+	private static final IfcLightDistributionCurveEnum[] VALUES_ARRAY = new IfcLightDistributionCurveEnum[] { NULL,
+			NOTDEFINED, TYPE_C, TYPE_A, TYPE_B, };
 
 	/**
 	 * A public read-only list of all the '<em><b>Ifc Light Distribution Curve Enum</b></em>' enumerators.
@@ -171,12 +170,15 @@ public enum IfcLightDistributionCurveEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public static final List<IfcLightDistributionCurveEnum> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
+	public static final List<IfcLightDistributionCurveEnum> VALUES = Collections
+			.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
 	/**
 	 * Returns the '<em><b>Ifc Light Distribution Curve Enum</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param literal the literal.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcLightDistributionCurveEnum get(String literal) {
@@ -193,6 +195,8 @@ public enum IfcLightDistributionCurveEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Light Distribution Curve Enum</b></em>' literal with the specified name.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param name the name.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcLightDistributionCurveEnum getByName(String name) {
@@ -209,6 +213,8 @@ public enum IfcLightDistributionCurveEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Light Distribution Curve Enum</b></em>' literal with the specified integer value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param value the integer value.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcLightDistributionCurveEnum get(int value) {
@@ -219,10 +225,10 @@ public enum IfcLightDistributionCurveEnum implements Enumerator {
 			return NOTDEFINED;
 		case TYPE_C_VALUE:
 			return TYPE_C;
-		case TYPE_B_VALUE:
-			return TYPE_B;
 		case TYPE_A_VALUE:
 			return TYPE_A;
+		case TYPE_B_VALUE:
+			return TYPE_B;
 		}
 		return null;
 	}

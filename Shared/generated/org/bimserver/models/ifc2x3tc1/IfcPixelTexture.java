@@ -16,6 +16,8 @@
  */
 package org.bimserver.models.ifc2x3tc1;
 
+import org.eclipse.emf.common.util.EList;
+
 /**
  * <!-- begin-user-doc -->
  * A representation of the model object '<em><b>Ifc Pixel Texture</b></em>'.
@@ -23,12 +25,13 @@ package org.bimserver.models.ifc2x3tc1;
  *
  * <p>
  * The following features are supported:
+ * </p>
  * <ul>
  *   <li>{@link org.bimserver.models.ifc2x3tc1.IfcPixelTexture#getWidth <em>Width</em>}</li>
  *   <li>{@link org.bimserver.models.ifc2x3tc1.IfcPixelTexture#getHeight <em>Height</em>}</li>
  *   <li>{@link org.bimserver.models.ifc2x3tc1.IfcPixelTexture#getColourComponents <em>Colour Components</em>}</li>
+ *   <li>{@link org.bimserver.models.ifc2x3tc1.IfcPixelTexture#getPixel <em>Pixel</em>}</li>
  * </ul>
- * </p>
  *
  * @see org.bimserver.models.ifc2x3tc1.Ifc2x3tc1Package#getIfcPixelTexture()
  * @model
@@ -112,5 +115,21 @@ public interface IfcPixelTexture extends IfcSurfaceTexture {
 	 * @generated
 	 */
 	void setColourComponents(int value);
+
+	/**
+	 * Returns the value of the '<em><b>Pixel</b></em>' attribute list.
+	 * The list contents are of type {@link byte}[].
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of the '<em>Pixel</em>' attribute list isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @return the value of the '<em>Pixel</em>' attribute list.
+	 * @see org.bimserver.models.ifc2x3tc1.Ifc2x3tc1Package#getIfcPixelTexture_Pixel()
+	 * @model unique="false"
+	 * @generated
+	 */
+	EList<byte[]> getPixel();
 
 } // IfcPixelTexture

@@ -43,16 +43,6 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	NULL(0, "NULL", "NULL"),
 
 	/**
-	 * The '<em><b>FLEXIBLESEGMENT</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #FLEXIBLESEGMENT_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	FLEXIBLESEGMENT(1, "FLEXIBLESEGMENT", "FLEXIBLESEGMENT"),
-
-	/**
 	 * The '<em><b>NOTDEFINED</b></em>' literal object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -60,7 +50,7 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	NOTDEFINED(2, "NOTDEFINED", "NOTDEFINED"),
+	NOTDEFINED(1, "NOTDEFINED", "NOTDEFINED"),
 
 	/**
 	 * The '<em><b>RIGIDSEGMENT</b></em>' literal object.
@@ -70,7 +60,15 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	RIGIDSEGMENT(3, "RIGIDSEGMENT", "RIGIDSEGMENT"),
+	RIGIDSEGMENT(2, "RIGIDSEGMENT", "RIGIDSEGMENT"), /**
+														* The '<em><b>FLEXIBLESEGMENT</b></em>' literal object.
+														* <!-- begin-user-doc -->
+														* <!-- end-user-doc -->
+														* @see #FLEXIBLESEGMENT_VALUE
+														* @generated
+														* @ordered
+														*/
+	FLEXIBLESEGMENT(3, "FLEXIBLESEGMENT", "FLEXIBLESEGMENT"),
 
 	/**
 	 * The '<em><b>USERDEFINED</b></em>' literal object.
@@ -98,21 +96,6 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	public static final int NULL_VALUE = 0;
 
 	/**
-	 * The '<em><b>FLEXIBLESEGMENT</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>FLEXIBLESEGMENT</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #FLEXIBLESEGMENT
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int FLEXIBLESEGMENT_VALUE = 1;
-
-	/**
 	 * The '<em><b>NOTDEFINED</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
@@ -125,7 +108,7 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int NOTDEFINED_VALUE = 2;
+	public static final int NOTDEFINED_VALUE = 1;
 
 	/**
 	 * The '<em><b>RIGIDSEGMENT</b></em>' literal value.
@@ -140,7 +123,22 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int RIGIDSEGMENT_VALUE = 3;
+	public static final int RIGIDSEGMENT_VALUE = 2;
+
+	/**
+	 * The '<em><b>FLEXIBLESEGMENT</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>FLEXIBLESEGMENT</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #FLEXIBLESEGMENT
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int FLEXIBLESEGMENT_VALUE = 3;
 
 	/**
 	 * The '<em><b>USERDEFINED</b></em>' literal value.
@@ -163,7 +161,8 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private static final IfcDuctSegmentTypeEnum[] VALUES_ARRAY = new IfcDuctSegmentTypeEnum[] { NULL, FLEXIBLESEGMENT, NOTDEFINED, RIGIDSEGMENT, USERDEFINED, };
+	private static final IfcDuctSegmentTypeEnum[] VALUES_ARRAY = new IfcDuctSegmentTypeEnum[] { NULL, NOTDEFINED,
+			RIGIDSEGMENT, FLEXIBLESEGMENT, USERDEFINED, };
 
 	/**
 	 * A public read-only list of all the '<em><b>Ifc Duct Segment Type Enum</b></em>' enumerators.
@@ -177,6 +176,8 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Duct Segment Type Enum</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param literal the literal.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcDuctSegmentTypeEnum get(String literal) {
@@ -193,6 +194,8 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Duct Segment Type Enum</b></em>' literal with the specified name.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param name the name.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcDuctSegmentTypeEnum getByName(String name) {
@@ -209,18 +212,20 @@ public enum IfcDuctSegmentTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Duct Segment Type Enum</b></em>' literal with the specified integer value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param value the integer value.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcDuctSegmentTypeEnum get(int value) {
 		switch (value) {
 		case NULL_VALUE:
 			return NULL;
-		case FLEXIBLESEGMENT_VALUE:
-			return FLEXIBLESEGMENT;
 		case NOTDEFINED_VALUE:
 			return NOTDEFINED;
 		case RIGIDSEGMENT_VALUE:
 			return RIGIDSEGMENT;
+		case FLEXIBLESEGMENT_VALUE:
+			return FLEXIBLESEGMENT;
 		case USERDEFINED_VALUE:
 			return USERDEFINED;
 		}

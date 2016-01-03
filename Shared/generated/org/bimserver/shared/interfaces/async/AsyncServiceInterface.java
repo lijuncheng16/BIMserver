@@ -94,6 +94,11 @@ public class AsyncServiceInterface {
 		void error(Throwable e);
 	}
 	
+	public interface CheckinInitiatedCallback {
+		void success(java.lang.Long result);
+		void error(Throwable e);
+	}
+	
 	public interface CleanupLongActionCallback {
 		void success();
 		void error(Throwable e);
@@ -274,6 +279,11 @@ public class AsyncServiceInterface {
 		void error(Throwable e);
 	}
 	
+	public interface GetGeometryInfoCallback {
+		void success(org.bimserver.interfaces.objects.SGeometryInfo result);
+		void error(Throwable e);
+	}
+	
 	public interface GetIfcHeaderCallback {
 		void success(org.bimserver.interfaces.objects.SIfcHeader result);
 		void error(Throwable e);
@@ -281,6 +291,11 @@ public class AsyncServiceInterface {
 	
 	public interface GetModelCheckerInstanceCallback {
 		void success(org.bimserver.interfaces.objects.SModelCheckerInstance result);
+		void error(Throwable e);
+	}
+	
+	public interface GetNrPrimitivesCallback {
+		void success(java.lang.Long result);
 		void error(Throwable e);
 	}
 	
@@ -346,6 +361,11 @@ public class AsyncServiceInterface {
 	
 	public interface ImportDataCallback {
 		void success();
+		void error(Throwable e);
+	}
+	
+	public interface InitiateCheckinCallback {
+		void success(java.lang.Long result);
 		void error(Throwable e);
 	}
 	
@@ -602,11 +622,23 @@ public class AsyncServiceInterface {
 		});
 	}
 	
-	public void cleanupLongAction(final java.lang.Long actionId, final CleanupLongActionCallback callback) {
+	public void checkinInitiated(final java.lang.Long topicId, final java.lang.Long poid, final java.lang.String comment, final java.lang.Long deserializerOid, final java.lang.Long fileSize, final java.lang.String fileName, final javax.activation.DataHandler data, final java.lang.Boolean merge, final java.lang.Boolean sync, final CheckinInitiatedCallback callback) {
 		executorService.submit(new Runnable(){
 			public void run(){
 				try {
-					syncService.cleanupLongAction(actionId);
+					callback.success(syncService.checkinInitiated(topicId, poid, comment, deserializerOid, fileSize, fileName, data, merge, sync));
+				} catch (Throwable e) {
+					callback.error(e);
+				}
+			}
+		});
+	}
+	
+	public void cleanupLongAction(final java.lang.Long topicId, final CleanupLongActionCallback callback) {
+		executorService.submit(new Runnable(){
+			public void run(){
+				try {
+					syncService.cleanupLongAction(topicId);
 					callback.success();
 				} catch (Throwable e) {
 					callback.error(e);
@@ -1036,6 +1068,18 @@ public class AsyncServiceInterface {
 		});
 	}
 	
+	public void getGeometryInfo(final java.lang.Long roid, final java.lang.Long oid, final GetGeometryInfoCallback callback) {
+		executorService.submit(new Runnable(){
+			public void run(){
+				try {
+					callback.success(syncService.getGeometryInfo(roid, oid));
+				} catch (Throwable e) {
+					callback.error(e);
+				}
+			}
+		});
+	}
+	
 	public void getIfcHeader(final java.lang.Long croid, final GetIfcHeaderCallback callback) {
 		executorService.submit(new Runnable(){
 			public void run(){
@@ -1053,6 +1097,18 @@ public class AsyncServiceInterface {
 			public void run(){
 				try {
 					callback.success(syncService.getModelCheckerInstance(mcioid));
+				} catch (Throwable e) {
+					callback.error(e);
+				}
+			}
+		});
+	}
+	
+	public void getNrPrimitives(final java.lang.Long roid, final GetNrPrimitivesCallback callback) {
+		executorService.submit(new Runnable(){
+			public void run(){
+				try {
+					callback.success(syncService.getNrPrimitives(roid));
 				} catch (Throwable e) {
 					callback.error(e);
 				}
@@ -1210,6 +1266,18 @@ public class AsyncServiceInterface {
 				try {
 					syncService.importData(address, username, password, path);
 					callback.success();
+				} catch (Throwable e) {
+					callback.error(e);
+				}
+			}
+		});
+	}
+	
+	public void initiateCheckin(final java.lang.Long poid, final java.lang.Long deserializerOid, final InitiateCheckinCallback callback) {
+		executorService.submit(new Runnable(){
+			public void run(){
+				try {
+					callback.success(syncService.initiateCheckin(poid, deserializerOid));
 				} catch (Throwable e) {
 					callback.error(e);
 				}

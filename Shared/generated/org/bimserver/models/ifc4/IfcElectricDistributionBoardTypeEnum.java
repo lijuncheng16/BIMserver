@@ -43,16 +43,6 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	NULL(0, "NULL", "NULL"),
 
 	/**
-	 * The '<em><b>CONSUMERUNIT</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #CONSUMERUNIT_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	CONSUMERUNIT(1, "CONSUMERUNIT", "CONSUMERUNIT"),
-
-	/**
 	 * The '<em><b>NOTDEFINED</b></em>' literal object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -60,37 +50,7 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	NOTDEFINED(2, "NOTDEFINED", "NOTDEFINED"),
-
-	/**
-	 * The '<em><b>SWITCHBOARD</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #SWITCHBOARD_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	SWITCHBOARD(3, "SWITCHBOARD", "SWITCHBOARD"),
-
-	/**
-	 * The '<em><b>MOTORCONTROLCENTRE</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #MOTORCONTROLCENTRE_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	MOTORCONTROLCENTRE(4, "MOTORCONTROLCENTRE", "MOTORCONTROLCENTRE"),
-
-	/**
-	 * The '<em><b>USERDEFINED</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #USERDEFINED_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	USERDEFINED(5, "USERDEFINED", "USERDEFINED"),
+	NOTDEFINED(1, "NOTDEFINED", "NOTDEFINED"),
 
 	/**
 	 * The '<em><b>DISTRIBUTIONBOARD</b></em>' literal object.
@@ -100,7 +60,39 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	DISTRIBUTIONBOARD(6, "DISTRIBUTIONBOARD", "DISTRIBUTIONBOARD");
+	DISTRIBUTIONBOARD(2, "DISTRIBUTIONBOARD", "DISTRIBUTIONBOARD"), /**
+																	* The '<em><b>CONSUMERUNIT</b></em>' literal object.
+																	* <!-- begin-user-doc -->
+																	* <!-- end-user-doc -->
+																	* @see #CONSUMERUNIT_VALUE
+																	* @generated
+																	* @ordered
+																	*/
+	CONSUMERUNIT(3, "CONSUMERUNIT", "CONSUMERUNIT"), /**
+														* The '<em><b>SWITCHBOARD</b></em>' literal object.
+														* <!-- begin-user-doc -->
+														* <!-- end-user-doc -->
+														* @see #SWITCHBOARD_VALUE
+														* @generated
+														* @ordered
+														*/
+	SWITCHBOARD(4, "SWITCHBOARD", "SWITCHBOARD"), /**
+													* The '<em><b>MOTORCONTROLCENTRE</b></em>' literal object.
+													* <!-- begin-user-doc -->
+													* <!-- end-user-doc -->
+													* @see #MOTORCONTROLCENTRE_VALUE
+													* @generated
+													* @ordered
+													*/
+	MOTORCONTROLCENTRE(5, "MOTORCONTROLCENTRE", "MOTORCONTROLCENTRE"), /**
+																		* The '<em><b>USERDEFINED</b></em>' literal object.
+																		* <!-- begin-user-doc -->
+																		* <!-- end-user-doc -->
+																		* @see #USERDEFINED_VALUE
+																		* @generated
+																		* @ordered
+																		*/
+	USERDEFINED(6, "USERDEFINED", "USERDEFINED");
 
 	/**
 	 * The '<em><b>NULL</b></em>' literal value.
@@ -118,21 +110,6 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	public static final int NULL_VALUE = 0;
 
 	/**
-	 * The '<em><b>CONSUMERUNIT</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>CONSUMERUNIT</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #CONSUMERUNIT
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int CONSUMERUNIT_VALUE = 1;
-
-	/**
 	 * The '<em><b>NOTDEFINED</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
@@ -145,52 +122,7 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int NOTDEFINED_VALUE = 2;
-
-	/**
-	 * The '<em><b>SWITCHBOARD</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>SWITCHBOARD</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #SWITCHBOARD
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int SWITCHBOARD_VALUE = 3;
-
-	/**
-	 * The '<em><b>MOTORCONTROLCENTRE</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>MOTORCONTROLCENTRE</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #MOTORCONTROLCENTRE
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int MOTORCONTROLCENTRE_VALUE = 4;
-
-	/**
-	 * The '<em><b>USERDEFINED</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>USERDEFINED</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #USERDEFINED
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int USERDEFINED_VALUE = 5;
+	public static final int NOTDEFINED_VALUE = 1;
 
 	/**
 	 * The '<em><b>DISTRIBUTIONBOARD</b></em>' literal value.
@@ -205,7 +137,67 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int DISTRIBUTIONBOARD_VALUE = 6;
+	public static final int DISTRIBUTIONBOARD_VALUE = 2;
+
+	/**
+	 * The '<em><b>CONSUMERUNIT</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>CONSUMERUNIT</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #CONSUMERUNIT
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int CONSUMERUNIT_VALUE = 3;
+
+	/**
+	 * The '<em><b>SWITCHBOARD</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>SWITCHBOARD</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #SWITCHBOARD
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int SWITCHBOARD_VALUE = 4;
+
+	/**
+	 * The '<em><b>MOTORCONTROLCENTRE</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>MOTORCONTROLCENTRE</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #MOTORCONTROLCENTRE
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int MOTORCONTROLCENTRE_VALUE = 5;
+
+	/**
+	 * The '<em><b>USERDEFINED</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>USERDEFINED</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #USERDEFINED
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int USERDEFINED_VALUE = 6;
 
 	/**
 	 * An array of all the '<em><b>Ifc Electric Distribution Board Type Enum</b></em>' enumerators.
@@ -213,8 +205,8 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private static final IfcElectricDistributionBoardTypeEnum[] VALUES_ARRAY = new IfcElectricDistributionBoardTypeEnum[] { NULL, CONSUMERUNIT, NOTDEFINED, SWITCHBOARD,
-			MOTORCONTROLCENTRE, USERDEFINED, DISTRIBUTIONBOARD, };
+	private static final IfcElectricDistributionBoardTypeEnum[] VALUES_ARRAY = new IfcElectricDistributionBoardTypeEnum[] {
+			NULL, NOTDEFINED, DISTRIBUTIONBOARD, CONSUMERUNIT, SWITCHBOARD, MOTORCONTROLCENTRE, USERDEFINED, };
 
 	/**
 	 * A public read-only list of all the '<em><b>Ifc Electric Distribution Board Type Enum</b></em>' enumerators.
@@ -222,12 +214,15 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public static final List<IfcElectricDistributionBoardTypeEnum> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
+	public static final List<IfcElectricDistributionBoardTypeEnum> VALUES = Collections
+			.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
 	/**
 	 * Returns the '<em><b>Ifc Electric Distribution Board Type Enum</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param literal the literal.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcElectricDistributionBoardTypeEnum get(String literal) {
@@ -244,6 +239,8 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Electric Distribution Board Type Enum</b></em>' literal with the specified name.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param name the name.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcElectricDistributionBoardTypeEnum getByName(String name) {
@@ -260,24 +257,26 @@ public enum IfcElectricDistributionBoardTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Electric Distribution Board Type Enum</b></em>' literal with the specified integer value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param value the integer value.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcElectricDistributionBoardTypeEnum get(int value) {
 		switch (value) {
 		case NULL_VALUE:
 			return NULL;
-		case CONSUMERUNIT_VALUE:
-			return CONSUMERUNIT;
 		case NOTDEFINED_VALUE:
 			return NOTDEFINED;
+		case DISTRIBUTIONBOARD_VALUE:
+			return DISTRIBUTIONBOARD;
+		case CONSUMERUNIT_VALUE:
+			return CONSUMERUNIT;
 		case SWITCHBOARD_VALUE:
 			return SWITCHBOARD;
 		case MOTORCONTROLCENTRE_VALUE:
 			return MOTORCONTROLCENTRE;
 		case USERDEFINED_VALUE:
 			return USERDEFINED;
-		case DISTRIBUTIONBOARD_VALUE:
-			return DISTRIBUTIONBOARD;
 		}
 		return null;
 	}

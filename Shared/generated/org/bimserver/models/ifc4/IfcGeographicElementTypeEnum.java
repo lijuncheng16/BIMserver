@@ -53,16 +53,6 @@ public enum IfcGeographicElementTypeEnum implements Enumerator {
 	NOTDEFINED(1, "NOTDEFINED", "NOTDEFINED"),
 
 	/**
-	 * The '<em><b>USERDEFINED</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #USERDEFINED_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	USERDEFINED(2, "USERDEFINED", "USERDEFINED"),
-
-	/**
 	 * The '<em><b>TERRAIN</b></em>' literal object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -70,7 +60,15 @@ public enum IfcGeographicElementTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	TERRAIN(3, "TERRAIN", "TERRAIN");
+	TERRAIN(2, "TERRAIN", "TERRAIN"), /**
+										* The '<em><b>USERDEFINED</b></em>' literal object.
+										* <!-- begin-user-doc -->
+										* <!-- end-user-doc -->
+										* @see #USERDEFINED_VALUE
+										* @generated
+										* @ordered
+										*/
+	USERDEFINED(3, "USERDEFINED", "USERDEFINED");
 
 	/**
 	 * The '<em><b>NULL</b></em>' literal value.
@@ -103,21 +101,6 @@ public enum IfcGeographicElementTypeEnum implements Enumerator {
 	public static final int NOTDEFINED_VALUE = 1;
 
 	/**
-	 * The '<em><b>USERDEFINED</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>USERDEFINED</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #USERDEFINED
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int USERDEFINED_VALUE = 2;
-
-	/**
 	 * The '<em><b>TERRAIN</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
@@ -130,7 +113,22 @@ public enum IfcGeographicElementTypeEnum implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int TERRAIN_VALUE = 3;
+	public static final int TERRAIN_VALUE = 2;
+
+	/**
+	 * The '<em><b>USERDEFINED</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>USERDEFINED</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #USERDEFINED
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int USERDEFINED_VALUE = 3;
 
 	/**
 	 * An array of all the '<em><b>Ifc Geographic Element Type Enum</b></em>' enumerators.
@@ -138,7 +136,8 @@ public enum IfcGeographicElementTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private static final IfcGeographicElementTypeEnum[] VALUES_ARRAY = new IfcGeographicElementTypeEnum[] { NULL, NOTDEFINED, USERDEFINED, TERRAIN, };
+	private static final IfcGeographicElementTypeEnum[] VALUES_ARRAY = new IfcGeographicElementTypeEnum[] { NULL,
+			NOTDEFINED, TERRAIN, USERDEFINED, };
 
 	/**
 	 * A public read-only list of all the '<em><b>Ifc Geographic Element Type Enum</b></em>' enumerators.
@@ -146,12 +145,15 @@ public enum IfcGeographicElementTypeEnum implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	public static final List<IfcGeographicElementTypeEnum> VALUES = Collections.unmodifiableList(Arrays.asList(VALUES_ARRAY));
+	public static final List<IfcGeographicElementTypeEnum> VALUES = Collections
+			.unmodifiableList(Arrays.asList(VALUES_ARRAY));
 
 	/**
 	 * Returns the '<em><b>Ifc Geographic Element Type Enum</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param literal the literal.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcGeographicElementTypeEnum get(String literal) {
@@ -168,6 +170,8 @@ public enum IfcGeographicElementTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Geographic Element Type Enum</b></em>' literal with the specified name.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param name the name.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcGeographicElementTypeEnum getByName(String name) {
@@ -184,6 +188,8 @@ public enum IfcGeographicElementTypeEnum implements Enumerator {
 	 * Returns the '<em><b>Ifc Geographic Element Type Enum</b></em>' literal with the specified integer value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param value the integer value.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcGeographicElementTypeEnum get(int value) {
@@ -192,10 +198,10 @@ public enum IfcGeographicElementTypeEnum implements Enumerator {
 			return NULL;
 		case NOTDEFINED_VALUE:
 			return NOTDEFINED;
-		case USERDEFINED_VALUE:
-			return USERDEFINED;
 		case TERRAIN_VALUE:
 			return TERRAIN;
+		case USERDEFINED_VALUE:
+			return USERDEFINED;
 		}
 		return null;
 	}

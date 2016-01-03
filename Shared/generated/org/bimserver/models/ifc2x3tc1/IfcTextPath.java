@@ -43,16 +43,6 @@ public enum IfcTextPath implements Enumerator {
 	NULL(0, "NULL", "NULL"),
 
 	/**
-	 * The '<em><b>RIGHT</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #RIGHT_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	RIGHT(1, "RIGHT", "RIGHT"),
-
-	/**
 	 * The '<em><b>DOWN</b></em>' literal object.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
@@ -60,17 +50,7 @@ public enum IfcTextPath implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	DOWN(2, "DOWN", "DOWN"),
-
-	/**
-	 * The '<em><b>UP</b></em>' literal object.
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 * @see #UP_VALUE
-	 * @generated
-	 * @ordered
-	 */
-	UP(3, "UP", "UP"),
+	DOWN(1, "DOWN", "DOWN"),
 
 	/**
 	 * The '<em><b>LEFT</b></em>' literal object.
@@ -80,7 +60,23 @@ public enum IfcTextPath implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	LEFT(4, "LEFT", "LEFT");
+	LEFT(2, "LEFT", "LEFT"), /**
+								* The '<em><b>RIGHT</b></em>' literal object.
+								* <!-- begin-user-doc -->
+								* <!-- end-user-doc -->
+								* @see #RIGHT_VALUE
+								* @generated
+								* @ordered
+								*/
+	RIGHT(3, "RIGHT", "RIGHT"), /**
+								* The '<em><b>UP</b></em>' literal object.
+								* <!-- begin-user-doc -->
+								* <!-- end-user-doc -->
+								* @see #UP_VALUE
+								* @generated
+								* @ordered
+								*/
+	UP(4, "UP", "UP");
 
 	/**
 	 * The '<em><b>NULL</b></em>' literal value.
@@ -98,21 +94,6 @@ public enum IfcTextPath implements Enumerator {
 	public static final int NULL_VALUE = 0;
 
 	/**
-	 * The '<em><b>RIGHT</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>RIGHT</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #RIGHT
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int RIGHT_VALUE = 1;
-
-	/**
 	 * The '<em><b>DOWN</b></em>' literal value.
 	 * <!-- begin-user-doc -->
 	 * <p>
@@ -125,22 +106,7 @@ public enum IfcTextPath implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int DOWN_VALUE = 2;
-
-	/**
-	 * The '<em><b>UP</b></em>' literal value.
-	 * <!-- begin-user-doc -->
-	 * <p>
-	 * If the meaning of '<em><b>UP</b></em>' literal object isn't clear,
-	 * there really should be more of a description here...
-	 * </p>
-	 * <!-- end-user-doc -->
-	 * @see #UP
-	 * @model
-	 * @generated
-	 * @ordered
-	 */
-	public static final int UP_VALUE = 3;
+	public static final int DOWN_VALUE = 1;
 
 	/**
 	 * The '<em><b>LEFT</b></em>' literal value.
@@ -155,7 +121,37 @@ public enum IfcTextPath implements Enumerator {
 	 * @generated
 	 * @ordered
 	 */
-	public static final int LEFT_VALUE = 4;
+	public static final int LEFT_VALUE = 2;
+
+	/**
+	 * The '<em><b>RIGHT</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>RIGHT</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #RIGHT
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int RIGHT_VALUE = 3;
+
+	/**
+	 * The '<em><b>UP</b></em>' literal value.
+	 * <!-- begin-user-doc -->
+	 * <p>
+	 * If the meaning of '<em><b>UP</b></em>' literal object isn't clear,
+	 * there really should be more of a description here...
+	 * </p>
+	 * <!-- end-user-doc -->
+	 * @see #UP
+	 * @model
+	 * @generated
+	 * @ordered
+	 */
+	public static final int UP_VALUE = 4;
 
 	/**
 	 * An array of all the '<em><b>Ifc Text Path</b></em>' enumerators.
@@ -163,7 +159,7 @@ public enum IfcTextPath implements Enumerator {
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	private static final IfcTextPath[] VALUES_ARRAY = new IfcTextPath[] { NULL, RIGHT, DOWN, UP, LEFT, };
+	private static final IfcTextPath[] VALUES_ARRAY = new IfcTextPath[] { NULL, DOWN, LEFT, RIGHT, UP, };
 
 	/**
 	 * A public read-only list of all the '<em><b>Ifc Text Path</b></em>' enumerators.
@@ -177,6 +173,8 @@ public enum IfcTextPath implements Enumerator {
 	 * Returns the '<em><b>Ifc Text Path</b></em>' literal with the specified literal value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param literal the literal.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcTextPath get(String literal) {
@@ -193,6 +191,8 @@ public enum IfcTextPath implements Enumerator {
 	 * Returns the '<em><b>Ifc Text Path</b></em>' literal with the specified name.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param name the name.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcTextPath getByName(String name) {
@@ -209,20 +209,22 @@ public enum IfcTextPath implements Enumerator {
 	 * Returns the '<em><b>Ifc Text Path</b></em>' literal with the specified integer value.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
+	 * @param value the integer value.
+	 * @return the matching enumerator or <code>null</code>.
 	 * @generated
 	 */
 	public static IfcTextPath get(int value) {
 		switch (value) {
 		case NULL_VALUE:
 			return NULL;
-		case RIGHT_VALUE:
-			return RIGHT;
 		case DOWN_VALUE:
 			return DOWN;
-		case UP_VALUE:
-			return UP;
 		case LEFT_VALUE:
 			return LEFT;
+		case RIGHT_VALUE:
+			return RIGHT;
+		case UP_VALUE:
+			return UP;
 		}
 		return null;
 	}

@@ -23,10 +23,10 @@ import java.util.Set;
 
 import javax.activation.DataHandler;
 
-import org.bimserver.database.BimserverDatabaseException;
+import org.bimserver.BimserverDatabaseException;
 import org.bimserver.database.DatabaseSession;
-import org.bimserver.database.Query;
-import org.bimserver.database.Query.Deep;
+import org.bimserver.database.OldQuery;
+import org.bimserver.database.OldQuery.Deep;
 import org.bimserver.database.actions.AddExtendedDataToRevisionDatabaseAction;
 import org.bimserver.database.actions.AddProjectDatabaseAction;
 import org.bimserver.database.actions.BimDatabaseAction;
@@ -51,6 +51,7 @@ import org.bimserver.database.actions.GetSerializerByIdDatabaseAction;
 import org.bimserver.database.actions.GetSerializerByNameDatabaseAction;
 import org.bimserver.database.actions.GetSubProjectsDatabaseAction;
 import org.bimserver.database.actions.UndeleteProjectDatabaseAction;
+import org.bimserver.emf.IdEObject;
 import org.bimserver.emf.Schema;
 import org.bimserver.interfaces.objects.SCheckoutResult;
 import org.bimserver.interfaces.objects.SDeserializerPluginConfiguration;
@@ -65,10 +66,12 @@ import org.bimserver.interfaces.objects.SSerializerPluginConfiguration;
 import org.bimserver.longaction.CannotBeScheduledException;
 import org.bimserver.longaction.DownloadParameters;
 import org.bimserver.longaction.DownloadParameters.DownloadType;
+import org.bimserver.longaction.LongAction;
 import org.bimserver.longaction.LongBranchAction;
 import org.bimserver.longaction.LongCheckoutAction;
 import org.bimserver.longaction.LongDownloadAction;
 import org.bimserver.longaction.LongDownloadOrCheckoutAction;
+import org.bimserver.longaction.LongStreamingDownloadAction;
 import org.bimserver.models.store.DeserializerPluginConfiguration;
 import org.bimserver.models.store.ExtendedData;
 import org.bimserver.models.store.Project;
@@ -77,7 +80,13 @@ import org.bimserver.models.store.SerializerPluginConfiguration;
 import org.bimserver.models.store.StorePackage;
 import org.bimserver.models.store.User;
 import org.bimserver.models.store.UserSettings;
+import org.bimserver.plugins.Plugin;
 import org.bimserver.plugins.deserializers.DeserializerPlugin;
+import org.bimserver.plugins.serializers.MessagingStreamingSerializerPlugin;
+import org.bimserver.plugins.serializers.SerializerException;
+import org.bimserver.plugins.serializers.SerializerPlugin;
+import org.bimserver.plugins.serializers.StreamingSerializer;
+import org.bimserver.plugins.serializers.StreamingSerializerPlugin;
 import org.bimserver.shared.exceptions.ServerException;
 import org.bimserver.shared.exceptions.UserException;
 import org.bimserver.shared.interfaces.ServiceInterface;
@@ -101,13 +110,18 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 	}
 	
 	@Override
+	public Long initiateCheckin(Long poid, Long deserializerOid) throws ServerException, UserException {
+		return getServiceMap().get(ServiceInterface.class).initiateCheckin(poid, deserializerOid);
+	}
+	
+	@Override
 	public Long checkout(Long roid, Long serializerOid, Boolean sync) throws ServerException, UserException {
 		requireAuthenticationAndRunningServer();
 		getAuthorization().canDownload(roid);
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		User user = null;
 		try {
-			SerializerPluginConfiguration serializerPluginConfiguration = (SerializerPluginConfiguration) session.get(serializerOid, Query.getDefault());
+			SerializerPluginConfiguration serializerPluginConfiguration = (SerializerPluginConfiguration) session.get(serializerOid, OldQuery.getDefault());
 //			org.bimserver.plugins.serializers.Serializer serializer = getBimServer().getEmfSerializerFactory().get(serializerOid).createSerializer(new org.bimserver.plugins.serializers.PluginConfiguration());
 			if (serializerPluginConfiguration == null) {
 				throw new UserException("No serializer with id " + serializerOid + " could be found");
@@ -119,7 +133,7 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 			downloadParameters.setRoid(roid);
 			downloadParameters.setSerializerOid(serializerOid);
 			
-			user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), Query.getDefault());
+			user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
 			LongDownloadOrCheckoutAction longDownloadAction = new LongCheckoutAction(getBimServer(), user.getName(), user.getUsername(), downloadParameters, getAuthorization(), getInternalAccessMethod());
 			try {
 				getBimServer().getLongActionManager().start(longDownloadAction);
@@ -143,34 +157,50 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 	}
 	
 	@Override
-	public void terminateLongRunningAction(Long actionId) throws ServerException, UserException {
-		LongDownloadOrCheckoutAction longAction = (LongDownloadOrCheckoutAction) getBimServer().getLongActionManager().getLongAction(actionId);
+	public void terminateLongRunningAction(Long topicId) throws ServerException, UserException {
+		LongAction<?> longAction = getBimServer().getLongActionManager().getLongAction(topicId);
 		if (longAction != null) {
 			longAction.terminate();
 		} else {
-			throw new UserException("No data found for laid " + actionId);
+			throw new UserException("No data found for topicId " + topicId);
 		}
 	}
 	
 	@Override
-	public SDownloadResult getDownloadData(final Long actionId) throws ServerException, UserException {
-		LongDownloadOrCheckoutAction longAction = (LongDownloadOrCheckoutAction) getBimServer().getLongActionManager().getLongAction(actionId);
-		if (longAction != null) {
+	public SDownloadResult getDownloadData(final Long topicId) throws ServerException, UserException {
+		LongAction<?> longAction = getBimServer().getLongActionManager().getLongAction(topicId);
+		if (longAction == null) {
+			throw new UserException("No data found for topicId " + topicId);
+		}
+		if (longAction instanceof LongStreamingDownloadAction) {
+			LongStreamingDownloadAction longStreamingDownloadAction = (LongStreamingDownloadAction)longAction;
+			if (longStreamingDownloadAction.getErrors().isEmpty()) {
+				SCheckoutResult result;
+				try {
+					result = longStreamingDownloadAction.getCheckoutResult();
+				} catch (SerializerException e) {
+					throw new UserException(e);
+				}
+				return result;
+			} else {
+				LOGGER.error(longStreamingDownloadAction.getErrors().get(0));
+				throw new ServerException(longStreamingDownloadAction.getErrors().get(0));
+			}
+		} else {
+			LongDownloadOrCheckoutAction longDownloadAction = (LongDownloadOrCheckoutAction) longAction;
 			try {
-				longAction.waitForCompletion();
-				if (longAction.getErrors().isEmpty()) {
-					SCheckoutResult result = longAction.getCheckoutResult();
+				longDownloadAction.waitForCompletion();
+				if (longDownloadAction.getErrors().isEmpty()) {
+					SCheckoutResult result = longDownloadAction.getCheckoutResult();
 					return result;
 				} else {
-					LOGGER.error(longAction.getErrors().get(0));
-					throw new ServerException(longAction.getErrors().get(0));
+					LOGGER.error(longDownloadAction.getErrors().get(0));
+					throw new ServerException(longDownloadAction.getErrors().get(0));
 				}
 			} catch (Exception e) {
 				LOGGER.error("", e);
 				throw new ServerException(e);
 			}
-		} else {
-			throw new UserException("No data found for laid " + actionId);
 		}
 	}
 	
@@ -181,7 +211,7 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 		}
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), Query.getDefault());
+			user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
 		} catch (BimserverDatabaseException e) {
 			throw new UserException(e);
 		} finally {
@@ -239,6 +269,44 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 		downloadParameters.setJsonQuery(jsonQuery);
 		downloadParameters.setSerializerOid(serializerOid);
 		return download(downloadParameters, sync);
+	}
+
+	@Override
+	public Long downloadByNewJsonQuery(Set<Long> roids, String jsonQuery, Long serializerOid, Boolean sync) throws ServerException, UserException {
+		User user = null;
+		DatabaseSession session = getBimServer().getDatabase().createSession();
+		Plugin plugin = null;
+		try {
+			SerializerPluginConfiguration serializerPluginConfiguration = session.get(StorePackage.eINSTANCE.getSerializerPluginConfiguration(), serializerOid, OldQuery.getDefault());
+			plugin = getBimServer().getPluginManager().getPlugin(serializerPluginConfiguration.getPluginDescriptor().getPluginClassName(), true);
+			user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
+		} catch (BimserverDatabaseException e) {
+			throw new UserException(e);
+		} finally {
+			session.close();
+		}
+		
+		if (plugin instanceof StreamingSerializerPlugin || plugin instanceof MessagingStreamingSerializerPlugin) {
+			LongStreamingDownloadAction longDownloadAction = new LongStreamingDownloadAction(getBimServer(), user == null ? "Unknown" : user.getName(), user == null ? "Unknown" : user.getUsername(), getAuthorization(), serializerOid, jsonQuery, roids);
+			try {
+				getBimServer().getLongActionManager().start(longDownloadAction);
+			} catch (Exception e) {
+				LOGGER.error("", e);
+			}
+			if (sync) {
+				longDownloadAction.waitForCompletion();
+			}
+			return longDownloadAction.getProgressTopic().getKey().getId();
+		} else if (plugin instanceof SerializerPlugin) {
+			requireAuthenticationAndRunningServer();
+			DownloadParameters downloadParameters = new DownloadParameters(getBimServer(), DownloadType.DOWNLOAD_BY_NEW_JSON_QUERY);
+			downloadParameters.setRoids(roids);
+			downloadParameters.setJsonQuery(jsonQuery);
+			downloadParameters.setSerializerOid(serializerOid);
+			return download(downloadParameters, sync);
+		} else {
+			throw new UserException("Unimplemented");
+		}
 	}
 
 	@Override
@@ -394,7 +462,7 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 			requireAuthenticationAndRunningServer();
 			DatabaseSession session = getBimServer().getDatabase().createSession();
 			try {
-				Project project = session.get(poid, Query.getDefault());
+				Project project = session.get(poid, OldQuery.getDefault());
 				for (DeserializerPlugin deserializerPlugin : getBimServer().getPluginManager().getAllDeserializerPlugins(true)) {
 					if (deserializerPlugin.canHandleExtension(extension)) {
 						UserSettings userSettings = getUserSettings(session);
@@ -494,7 +562,7 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
 			BranchToNewProjectDatabaseAction action = new BranchToNewProjectDatabaseAction(session, getInternalAccessMethod(), getBimServer(), getAuthorization(), roid, projectName, comment);
-			User user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), Query.getDefault());
+			User user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
 			String username = user.getName();
 			String userUsername = user.getUsername();
 			LongBranchAction longAction = new LongBranchAction(getBimServer(), username, userUsername, getAuthorization(), action);
@@ -516,7 +584,7 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 		final DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
 			BranchToExistingProjectDatabaseAction action = new BranchToExistingProjectDatabaseAction(session, getInternalAccessMethod(), getBimServer(), getAuthorization(), roid, destPoid, comment);
-			User user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), Query.getDefault());
+			User user = (User) session.get(StorePackage.eINSTANCE.getUser(), getAuthorization().getUoid(), OldQuery.getDefault());
 			String username = user.getName();
 			String userUsername = user.getUsername();
 			LongBranchAction longBranchAction = new LongBranchAction(getBimServer(), username, userUsername, getAuthorization(), action);
@@ -554,7 +622,7 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 		try {
 			GetProjectByPoidDatabaseAction action = new GetProjectByPoidDatabaseAction(session, getInternalAccessMethod(), poid, getAuthorization());
 			Project project = session.executeAndCommitAction(action);
-			User user = session.get(getAuthorization().getUoid(), Query.getDefault());
+			User user = session.get(getAuthorization().getUoid(), OldQuery.getDefault());
 			return GetAllProjectsSmallDatabaseAction.createSmallProject(getAuthorization(), getBimServer(), project, user);
 		} catch (Exception e) {
 			return handleException(e);
@@ -597,7 +665,7 @@ public class Bimsie1ServiceImpl extends GenericServiceImpl implements Bimsie1Ser
 	public List<SExtendedData> getAllExtendedDataOfRevision(Long roid) throws ServerException, UserException {
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			Revision revision = (Revision)session.get(StorePackage.eINSTANCE.getRevision(), roid, Query.getDefault());
+			Revision revision = (Revision)session.get(StorePackage.eINSTANCE.getRevision(), roid, OldQuery.getDefault());
 			return getBimServer().getSConverter().convertToSListExtendedData(revision.getExtendedData());
 		} catch (Exception e) {
 			return handleException(e);

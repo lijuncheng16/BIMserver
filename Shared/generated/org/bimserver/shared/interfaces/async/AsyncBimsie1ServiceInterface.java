@@ -94,6 +94,11 @@ public class AsyncBimsie1ServiceInterface {
 		void error(Throwable e);
 	}
 	
+	public interface DownloadByNewJsonQueryCallback {
+		void success(java.lang.Long result);
+		void error(Throwable e);
+	}
+	
 	public interface DownloadByOidsCallback {
 		void success(java.lang.Long result);
 		void error(Throwable e);
@@ -216,6 +221,11 @@ public class AsyncBimsie1ServiceInterface {
 	
 	public interface GetSuggestedDeserializerForExtensionCallback {
 		void success(org.bimserver.interfaces.objects.SDeserializerPluginConfiguration result);
+		void error(Throwable e);
+	}
+	
+	public interface InitiateCheckinCallback {
+		void success(java.lang.Long result);
 		void error(Throwable e);
 	}
 	
@@ -388,6 +398,18 @@ public class AsyncBimsie1ServiceInterface {
 		});
 	}
 	
+	public void downloadByNewJsonQuery(final java.util.Set<java.lang.Long> roids, final java.lang.String query, final java.lang.Long serializerOid, final java.lang.Boolean sync, final DownloadByNewJsonQueryCallback callback) {
+		executorService.submit(new Runnable(){
+			public void run(){
+				try {
+					callback.success(syncService.downloadByNewJsonQuery(roids, query, serializerOid, sync));
+				} catch (Throwable e) {
+					callback.error(e);
+				}
+			}
+		});
+	}
+	
 	public void downloadByOids(final java.util.Set<java.lang.Long> roids, final java.util.Set<java.lang.Long> oids, final java.lang.Long serializerOid, final java.lang.Boolean sync, final java.lang.Boolean deep, final DownloadByOidsCallback callback) {
 		executorService.submit(new Runnable(){
 			public void run(){
@@ -508,11 +530,11 @@ public class AsyncBimsie1ServiceInterface {
 		});
 	}
 	
-	public void getDownloadData(final java.lang.Long actionId, final GetDownloadDataCallback callback) {
+	public void getDownloadData(final java.lang.Long topicId, final GetDownloadDataCallback callback) {
 		executorService.submit(new Runnable(){
 			public void run(){
 				try {
-					callback.success(syncService.getDownloadData(actionId));
+					callback.success(syncService.getDownloadData(topicId));
 				} catch (Throwable e) {
 					callback.error(e);
 				}
@@ -688,11 +710,23 @@ public class AsyncBimsie1ServiceInterface {
 		});
 	}
 	
-	public void terminateLongRunningAction(final java.lang.Long actionId, final TerminateLongRunningActionCallback callback) {
+	public void initiateCheckin(final java.lang.Long poid, final java.lang.Long deserializerOid, final InitiateCheckinCallback callback) {
 		executorService.submit(new Runnable(){
 			public void run(){
 				try {
-					syncService.terminateLongRunningAction(actionId);
+					callback.success(syncService.initiateCheckin(poid, deserializerOid));
+				} catch (Throwable e) {
+					callback.error(e);
+				}
+			}
+		});
+	}
+	
+	public void terminateLongRunningAction(final java.lang.Long topicId, final TerminateLongRunningActionCallback callback) {
+		executorService.submit(new Runnable(){
+			public void run(){
+				try {
+					syncService.terminateLongRunningAction(topicId);
 					callback.success();
 				} catch (Throwable e) {
 					callback.error(e);

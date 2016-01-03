@@ -112,7 +112,7 @@ public class FileJarClassLoader extends JarClassLoader {
 					LOGGER.error("", e);
 				}
 			} else {
-				LOGGER.info("File not found: " + name + " (in " + jarFile.getFileName().toString() + ")");
+				LOGGER.debug("File not found: " + name + " (in " + jarFile.getFileName().toString() + ")");
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -147,9 +147,6 @@ public class FileJarClassLoader extends JarClassLoader {
 	
 	@Override
 	public Class<?> findClass(String name) throws ClassNotFoundException {
-		if (name.contains("Tuple3f")) {
-			System.out.println();
-		}
 		String fileName = name.replace(".", "/") + ".class";
 		if (loadedClasses.containsKey(fileName)) {
 			return loadedClasses.get(fileName);

@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.bimserver.BimServer;
+import org.bimserver.BimserverDatabaseException;
 import org.bimserver.GeometryCache;
 import org.bimserver.GeometryGeneratingException;
 import org.bimserver.GeometryGenerator;
@@ -29,12 +30,11 @@ import org.bimserver.SummaryMap;
 import org.bimserver.changes.Change;
 import org.bimserver.changes.CreateObjectChange;
 import org.bimserver.changes.RemoveObjectChange;
-import org.bimserver.database.BimserverDatabaseException;
 import org.bimserver.database.BimserverLockConflictException;
 import org.bimserver.database.DatabaseSession;
 import org.bimserver.database.PostCommitAction;
-import org.bimserver.database.Query;
-import org.bimserver.database.Query.Deep;
+import org.bimserver.database.OldQuery;
+import org.bimserver.database.OldQuery.Deep;
 import org.bimserver.emf.IdEObject;
 import org.bimserver.emf.IfcModelInterface;
 import org.bimserver.emf.PackageMetaData;
@@ -65,7 +65,7 @@ public class CommitTransactionDatabaseAction extends GenericCheckinDatabaseActio
 	private final GeometryCache geometryCache = new GeometryCache();
 
 	public CommitTransactionDatabaseAction(BimServer bimServer, DatabaseSession databaseSession, AccessMethod accessMethod, Authorization authorization, LongTransaction longTransaction, String comment) {
-		super(databaseSession, accessMethod, null);
+		super(databaseSession, accessMethod);
 		this.bimServer = bimServer;
 		this.authorization = authorization;
 		this.longTransaction = longTransaction;
@@ -115,7 +115,7 @@ public class CommitTransactionDatabaseAction extends GenericCheckinDatabaseActio
 		IfcModelInterface ifcModel = new BasicIfcModel(packageMetaData, null);
 		if (oldLastRevision != null) {
 			int highestStopId = AbstractDownloadDatabaseAction.findHighestStopRid(project, oldLastRevision.getLastConcreteRevision());
-			Query query = new Query(longTransaction.getPackageMetaData(), project.getId(), oldLastRevision.getId(), -1, null, Deep.YES, highestStopId);
+			OldQuery query = new OldQuery(longTransaction.getPackageMetaData(), project.getId(), oldLastRevision.getId(), -1, null, Deep.YES, highestStopId);
 			query.updateOidCounters(oldLastRevision.getLastConcreteRevision(), getDatabaseSession());
 			getDatabaseSession().getMap(ifcModel, query);
 		}

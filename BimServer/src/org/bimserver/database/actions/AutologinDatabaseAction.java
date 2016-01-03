@@ -20,10 +20,10 @@ package org.bimserver.database.actions;
 import java.util.Date;
 
 import org.bimserver.BimServer;
-import org.bimserver.database.BimserverDatabaseException;
+import org.bimserver.BimserverDatabaseException;
 import org.bimserver.database.BimserverLockConflictException;
 import org.bimserver.database.DatabaseSession;
-import org.bimserver.database.Query;
+import org.bimserver.database.OldQuery;
 import org.bimserver.models.log.AccessMethod;
 import org.bimserver.models.store.ObjectState;
 import org.bimserver.models.store.User;
@@ -52,7 +52,7 @@ public class AutologinDatabaseAction extends BimDatabaseAction<String>{
 	public String execute() throws UserException, BimserverLockConflictException, BimserverDatabaseException {
 		try {
 			Authorization authorization = Authorization.fromToken(bimServer.getEncryptionKey(), token);
-			User user = getDatabaseSession().get(authorization.getUoid(), Query.getDefault());
+			User user = getDatabaseSession().get(authorization.getUoid(), OldQuery.getDefault());
 			if (user.getState() == ObjectState.DELETED) {
 				throw new UserException("User account has been deleted");
 			} else if (user.getUserType() == UserType.SYSTEM) {

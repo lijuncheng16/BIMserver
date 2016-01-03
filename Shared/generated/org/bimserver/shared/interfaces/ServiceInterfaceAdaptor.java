@@ -68,7 +68,11 @@ public class ServiceInterfaceAdaptor implements org.bimserver.shared.interfaces.
 		return null;
 	}
 	
-	public void cleanupLongAction(java.lang.Long actionId) throws UserException, ServerException {
+	public java.lang.Long checkinInitiated(java.lang.Long topicId, java.lang.Long poid, java.lang.String comment, java.lang.Long deserializerOid, java.lang.Long fileSize, java.lang.String fileName, javax.activation.DataHandler data, java.lang.Boolean merge, java.lang.Boolean sync) throws UserException, ServerException {
+		return null;
+	}
+	
+	public void cleanupLongAction(java.lang.Long topicId) throws UserException, ServerException {
 	}
 	
 	public org.bimserver.interfaces.objects.SCompareResult compare(java.lang.Long roid1, java.lang.Long roid2, org.bimserver.interfaces.objects.SCompareType sCompareType, java.lang.Long mcid) throws UserException, ServerException {
@@ -210,11 +214,19 @@ public class ServiceInterfaceAdaptor implements org.bimserver.shared.interfaces.
 		return null;
 	}
 	
+	public org.bimserver.interfaces.objects.SGeometryInfo getGeometryInfo(java.lang.Long roid, java.lang.Long oid) throws UserException, ServerException {
+		return null;
+	}
+	
 	public org.bimserver.interfaces.objects.SIfcHeader getIfcHeader(java.lang.Long croid) throws UserException, ServerException {
 		return null;
 	}
 	
 	public org.bimserver.interfaces.objects.SModelCheckerInstance getModelCheckerInstance(java.lang.Long mcioid) throws UserException, ServerException {
+		return null;
+	}
+	
+	public java.lang.Long getNrPrimitives(java.lang.Long roid) throws UserException, ServerException {
 		return null;
 	}
 	
@@ -267,6 +279,10 @@ public class ServiceInterfaceAdaptor implements org.bimserver.shared.interfaces.
 	}
 	
 	public void importData(java.lang.String address, java.lang.String username, java.lang.String password, java.lang.String path) throws UserException, ServerException {
+	}
+	
+	public java.lang.Long initiateCheckin(java.lang.Long poid, java.lang.Long deserializerOid) throws UserException, ServerException {
+		return null;
 	}
 	
 	public void removeModelCheckerFromProject(java.lang.Long poid, java.lang.Long modelCheckerOid) throws UserException, ServerException {

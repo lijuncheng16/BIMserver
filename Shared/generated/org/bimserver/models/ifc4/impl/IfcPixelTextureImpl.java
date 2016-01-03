@@ -18,6 +18,7 @@ package org.bimserver.models.ifc4.impl;
 
 import org.bimserver.models.ifc4.Ifc4Package;
 import org.bimserver.models.ifc4.IfcPixelTexture;
+import org.eclipse.emf.common.util.EList;
 import org.eclipse.emf.ecore.EClass;
 
 /**
@@ -26,12 +27,13 @@ import org.eclipse.emf.ecore.EClass;
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
+ * </p>
  * <ul>
  *   <li>{@link org.bimserver.models.ifc4.impl.IfcPixelTextureImpl#getWidth <em>Width</em>}</li>
  *   <li>{@link org.bimserver.models.ifc4.impl.IfcPixelTextureImpl#getHeight <em>Height</em>}</li>
  *   <li>{@link org.bimserver.models.ifc4.impl.IfcPixelTextureImpl#getColourComponents <em>Colour Components</em>}</li>
+ *   <li>{@link org.bimserver.models.ifc4.impl.IfcPixelTextureImpl#getPixel <em>Pixel</em>}</li>
  * </ul>
- * </p>
  *
  * @generated
  */
@@ -107,6 +109,16 @@ public class IfcPixelTextureImpl extends IfcSurfaceTextureImpl implements IfcPix
 	 */
 	public void setColourComponents(int newColourComponents) {
 		eSet(Ifc4Package.Literals.IFC_PIXEL_TEXTURE__COLOUR_COMPONENTS, newColourComponents);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	@SuppressWarnings("unchecked")
+	public EList<byte[]> getPixel() {
+		return (EList<byte[]>) eGet(Ifc4Package.Literals.IFC_PIXEL_TEXTURE__PIXEL, true);
 	}
 
 } //IfcPixelTextureImpl

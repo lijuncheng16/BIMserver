@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.bimserver.BimServer;
+import org.bimserver.BimserverDatabaseException;
 import org.bimserver.database.actions.AddUserDatabaseAction;
 import org.bimserver.database.actions.CreateBaseProjectDatabaseAction;
 import org.bimserver.database.berkeley.DatabaseInitException;
@@ -91,7 +92,7 @@ public class Database implements BimDatabase {
 	 * database-schema change. Do not change this variable when nothing has
 	 * changed in the schema!
 	 */
-	public static final int APPLICATION_SCHEMA_VERSION = 20;
+	public static final int APPLICATION_SCHEMA_VERSION = 22;
 
 	public Database(BimServer bimServer, Set<? extends EPackage> emfPackages, KeyValueStore keyValueStore, MetaDataManager metaDataManager) throws DatabaseInitException {
 		this.bimServer = bimServer;
@@ -423,9 +424,10 @@ public class Database implements BimDatabase {
 	}
 	
 	public EClass getEClassForOid(long oid) throws BimserverDatabaseException {
-		ByteBuffer buffer = ByteBuffer.wrap(new byte[8]);
-		buffer.putLong(oid);
-		short cid = buffer.getShort(6);
+//		ByteBuffer buffer = ByteBuffer.wrap(new byte[8]);
+//		buffer.putLong(oid);
+//		short cid = buffer.getShort(6);
+		short cid = (short)oid;
 		EClass eClass = getEClassForCid(cid);
 		if (eClass == null) {
 			throw new BimserverDatabaseException("No class for cid " + cid + " (cid came from oid: " + oid  + ")");

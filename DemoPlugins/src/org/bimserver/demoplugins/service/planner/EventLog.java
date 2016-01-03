@@ -14,7 +14,9 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
+import org.bimserver.demoplugins.service.planner.Event.Timing;
 import org.bimserver.emf.IfcModelInterface;
 import org.bimserver.models.ifc2x3tc1.IfcDateAndTime;
 import org.bimserver.models.ifc2x3tc1.IfcLabel;
@@ -39,11 +41,13 @@ import au.com.bytecode.opencsv.CSVWriter;
 
 public class EventLog implements Iterable<Event> {
 	private final List<Event> events = new ArrayList<>();
+	private Set<String> materialAggregators;
 
 	public EventLog() {
 	}
 	
-	public EventLog(InputStream inputStream) {
+	public EventLog(InputStream inputStream, Set<String> materialAggregators) {
+		this.materialAggregators = materialAggregators;
 		CSVReader reader = new CSVReader(new InputStreamReader(inputStream, Charsets.UTF_8));
 		try {
 			String[] header = reader.readNext();
@@ -53,12 +57,20 @@ public class EventLog implements Iterable<Event> {
 				event.setGuid(line[0]);
 				event.setType(line[1]);
 				event.setNlSfb(line[2]);
-				event.setMaterial(line[3]);
+				event.setMaterial(getSimlifiedMaterialName(line[3]));
 				event.setTask(line[4]);
 				event.setResource(line[5]);
 				event.setTaskName(line[6]);
 				event.setTaskStart(parseDate(line[7]));
 				event.setTaskFinish(parseDate(line[8]));
+				if (line.length > 9) {
+					String timing = line[9];
+					if (timing.equals("On time")) {
+						event.setTiming(Timing.ON_TIME);
+					} else if (timing.equals("Too late")) {
+						event.setTiming(Timing.TOO_LATE);
+					}
+				}
 				events.add(event);
 				line = reader.readNext();
 			}
@@ -80,12 +92,22 @@ public class EventLog implements Iterable<Event> {
 			events.add(event);
 		}
 	}
-
-	public EventLog(IfcModelInterface model) {
+	
+	private String getSimlifiedMaterialName(String materialName) {
+		for (String simplified : materialAggregators) {
+			if (!simplified.equals("") && materialName.toLowerCase().contains(simplified.toLowerCase())) {
+				return simplified;
+			}
+		}
+		return materialName;
+	}
+	
+	public EventLog(IfcModelInterface model, String nlsfbPropertyName, String materialPropertyName) {
 		for (IfcProduct ifcProduct : model.getAllWithSubTypes(IfcProduct.class)) {
 			Event event = new Event();
 			event.setGuid(ifcProduct.getGlobalId());
 			event.setResource(ifcProduct.getName());
+			event.setType(ifcProduct.eClass().getName());
 			
 			for (IfcRelDefines ifcRelDefines : ifcProduct.getIsDefinedBy()) {
 				if (ifcRelDefines instanceof IfcRelDefinesByProperties) {
@@ -98,11 +120,9 @@ public class EventLog implements Iterable<Event> {
 								IfcPropertySingleValue propertyValue = (IfcPropertySingleValue)ifcProperty;
 								if (propertyValue.getNominalValue() instanceof IfcLabel) {
 									IfcLabel label = (IfcLabel)propertyValue.getNominalValue();
-									if (ifcProperty.getName().equals("[ArchiCADProperties]Element Classification")) {
-										event.setType(label.getWrappedValue());
-									} else if (ifcProperty.getName().equals("[ArchiCADProperties]Building Material / Composite / Profile / Fill")) {
+									if (ifcProperty.getName().equals(materialPropertyName)) {
 										event.setMaterial(label.getWrappedValue());
-									} else if (ifcProperty.getName().equals("[ArchiCADProperties]Layer")) {
+									} else if (ifcProperty.getName().equals(nlsfbPropertyName)) {
 										event.setNlSfb(label.getWrappedValue());
 									}
 								}
@@ -135,6 +155,7 @@ public class EventLog implements Iterable<Event> {
 					}
 				}
 				events.add(event);
+				event = event.copy();
 			}
 		}
 	}
@@ -148,11 +169,19 @@ public class EventLog implements Iterable<Event> {
 	}
 
 	private GregorianCalendar parseDate(String string) throws ParseException {
-		DateFormat dateFormat = new SimpleDateFormat("d-M-y");
-		Date date = dateFormat.parse(string);
-		GregorianCalendar gregorianCalendar = new GregorianCalendar();
-		gregorianCalendar.setTime(date);
-		return gregorianCalendar;
+		try {
+			DateFormat dateFormat = new SimpleDateFormat("d-M-y");
+			Date date = dateFormat.parse(string);
+			GregorianCalendar gregorianCalendar = new GregorianCalendar();
+			gregorianCalendar.setTime(date);
+			return gregorianCalendar;
+		} catch (ParseException e) {
+			DateFormat dateFormat = new SimpleDateFormat("M/d/y");
+			Date date = dateFormat.parse(string);
+			GregorianCalendar gregorianCalendar = new GregorianCalendar();
+			gregorianCalendar.setTime(date);
+			return gregorianCalendar;
+		}
 	}
 	
 	public EventLog getOrderedByStartDate() {
@@ -197,6 +226,6 @@ public class EventLog implements Iterable<Event> {
 		}
 
 		csvWriter.close();
-		return null;
+		return sw.toString();
 	}
 }

@@ -19,6 +19,7 @@ package org.bimserver.models.store.impl;
 import java.util.Date;
 
 import org.bimserver.emf.IdEObjectImpl;
+import org.bimserver.models.geometry.Vector3f;
 import org.bimserver.models.store.ConcreteRevision;
 import org.bimserver.models.store.IfcHeader;
 import org.bimserver.models.store.Project;
@@ -35,6 +36,7 @@ import org.eclipse.emf.ecore.EClass;
  * <!-- end-user-doc -->
  * <p>
  * The following features are implemented:
+ * </p>
  * <ul>
  *   <li>{@link org.bimserver.models.store.impl.ConcreteRevisionImpl#getId <em>Id</em>}</li>
  *   <li>{@link org.bimserver.models.store.impl.ConcreteRevisionImpl#getProject <em>Project</em>}</li>
@@ -47,9 +49,10 @@ import org.eclipse.emf.ecore.EClass;
  *   <li>{@link org.bimserver.models.store.impl.ConcreteRevisionImpl#getSummary <em>Summary</em>}</li>
  *   <li>{@link org.bimserver.models.store.impl.ConcreteRevisionImpl#getUser <em>User</em>}</li>
  *   <li>{@link org.bimserver.models.store.impl.ConcreteRevisionImpl#getIfcHeader <em>Ifc Header</em>}</li>
+ *   <li>{@link org.bimserver.models.store.impl.ConcreteRevisionImpl#getMinBounds <em>Min Bounds</em>}</li>
+ *   <li>{@link org.bimserver.models.store.impl.ConcreteRevisionImpl#getMaxBounds <em>Max Bounds</em>}</li>
  *   <li>{@link org.bimserver.models.store.impl.ConcreteRevisionImpl#getOidCounters <em>Oid Counters</em>}</li>
  * </ul>
- * </p>
  *
  * @generated
  */
@@ -271,6 +274,42 @@ public class ConcreteRevisionImpl extends IdEObjectImpl implements ConcreteRevis
 	 */
 	public void setIfcHeader(IfcHeader newIfcHeader) {
 		eSet(StorePackage.Literals.CONCRETE_REVISION__IFC_HEADER, newIfcHeader);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public Vector3f getMinBounds() {
+		return (Vector3f) eGet(StorePackage.Literals.CONCRETE_REVISION__MIN_BOUNDS, true);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setMinBounds(Vector3f newMinBounds) {
+		eSet(StorePackage.Literals.CONCRETE_REVISION__MIN_BOUNDS, newMinBounds);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public Vector3f getMaxBounds() {
+		return (Vector3f) eGet(StorePackage.Literals.CONCRETE_REVISION__MAX_BOUNDS, true);
+	}
+
+	/**
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	public void setMaxBounds(Vector3f newMaxBounds) {
+		eSet(StorePackage.Literals.CONCRETE_REVISION__MAX_BOUNDS, newMaxBounds);
 	}
 
 	/**

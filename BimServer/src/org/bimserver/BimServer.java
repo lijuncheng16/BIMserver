@@ -44,16 +44,16 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.PatternLayout;
 import org.bimserver.cache.CompareCache;
 import org.bimserver.cache.DiskCacheManager;
+import org.bimserver.cache.NewDiskCacheManager;
 import org.bimserver.client.DirectBimServerClientFactory;
 import org.bimserver.client.json.JsonSocketReflectorFactory;
 import org.bimserver.client.protocolbuffers.ProtocolBuffersBimServerClientFactory;
 import org.bimserver.database.BimDatabase;
-import org.bimserver.database.BimserverDatabaseException;
 import org.bimserver.database.BimserverLockConflictException;
 import org.bimserver.database.Database;
 import org.bimserver.database.DatabaseRestartRequiredException;
 import org.bimserver.database.DatabaseSession;
-import org.bimserver.database.Query;
+import org.bimserver.database.OldQuery;
 import org.bimserver.database.berkeley.BerkeleyKeyValueStore;
 import org.bimserver.database.berkeley.BimserverConcurrentModificationDatabaseException;
 import org.bimserver.database.berkeley.DatabaseInitException;
@@ -61,7 +61,6 @@ import org.bimserver.database.migrations.InconsistentModelsException;
 import org.bimserver.database.query.conditions.AttributeCondition;
 import org.bimserver.database.query.conditions.Condition;
 import org.bimserver.database.query.literals.StringLiteral;
-import org.bimserver.deserializers.DeserializerFactory;
 import org.bimserver.emf.IfcModelInterface;
 import org.bimserver.emf.MetaDataManager;
 import org.bimserver.endpoints.EndPointManager;
@@ -80,7 +79,6 @@ import org.bimserver.models.store.DeserializerPluginConfiguration;
 import org.bimserver.models.store.DoubleType;
 import org.bimserver.models.store.InternalServicePluginConfiguration;
 import org.bimserver.models.store.LongType;
-import org.bimserver.models.store.MessagingSerializerPluginConfiguration;
 import org.bimserver.models.store.ModelComparePluginConfiguration;
 import org.bimserver.models.store.ModelMergerPluginConfiguration;
 import org.bimserver.models.store.ObjectDefinition;
@@ -114,13 +112,16 @@ import org.bimserver.plugins.PluginManager;
 import org.bimserver.plugins.PluginSourceType;
 import org.bimserver.plugins.ResourceFetcher;
 import org.bimserver.plugins.deserializers.DeserializerPlugin;
+import org.bimserver.plugins.deserializers.StreamingDeserializerPlugin;
 import org.bimserver.plugins.modelcompare.ModelComparePlugin;
 import org.bimserver.plugins.modelmerger.ModelMergerPlugin;
 import org.bimserver.plugins.objectidms.ObjectIDMPlugin;
 import org.bimserver.plugins.queryengine.QueryEnginePlugin;
 import org.bimserver.plugins.renderengine.RenderEnginePlugin;
 import org.bimserver.plugins.serializers.MessagingSerializerPlugin;
+import org.bimserver.plugins.serializers.MessagingStreamingSerializerPlugin;
 import org.bimserver.plugins.serializers.SerializerPlugin;
+import org.bimserver.plugins.serializers.StreamingSerializerPlugin;
 import org.bimserver.plugins.services.ServicePlugin;
 import org.bimserver.plugins.web.WebModulePlugin;
 import org.bimserver.schemaconverter.Ifc2x3tc1ToIfc4SchemaConverterFactory;
@@ -160,11 +161,11 @@ public class BimServer {
 	private JobScheduler bimScheduler;
 	private LongActionManager longActionManager;
 	private SerializerFactory serializerFactory;
-	private DeserializerFactory deserializerFactory;
 	private MergerFactory mergerFactory;
 	private PluginManager pluginManager;
 	private MailSystem mailSystem;
 	private DiskCacheManager diskCacheManager;
+	private NewDiskCacheManager newDiskCacheManager;
 	private ServerInfoManager serverInfoManager;
 	private PublicInterfaceFactory serviceFactory;
 	private VersionChecker versionChecker;
@@ -317,7 +318,7 @@ public class BimServer {
 								.getClass().getName()));
 						DatabaseSession session = bimDatabase.createSession();
 						try {
-							Map<Long, PluginDescriptor> pluginsFound = session.query(pluginCondition, PluginDescriptor.class, Query.getDefault());
+							Map<Long, PluginDescriptor> pluginsFound = session.query(pluginCondition, PluginDescriptor.class, OldQuery.getDefault());
 							if (pluginsFound.size() == 0) {
 								LOGGER.error("Error changing plugin-state in database, plugin " + pluginContext.getPlugin().getClass().getName() + " not found");
 							} else if (pluginsFound.size() == 1) {
@@ -365,7 +366,7 @@ public class BimServer {
 			
 			metricsRegistry = new MetricsRegistry();
 			
-			Query.setPackageMetaDataForDefaultQuery(metaDataManager.getPackageMetaData("store"));
+			OldQuery.setPackageMetaDataForDefaultQuery(metaDataManager.getPackageMetaData("store"));
 			
 			bimDatabase = new Database(this, packages, keyValueStore, metaDataManager);
 			try {
@@ -413,7 +414,6 @@ public class BimServer {
 			jsonHandler = new JsonHandler(this);
 			
 			serializerFactory = new SerializerFactory();
-			deserializerFactory = new DeserializerFactory();
 
 			serverSettingsCache = new ServerSettingsCache(bimDatabase);
 			
@@ -439,6 +439,7 @@ public class BimServer {
 			mailSystem = new MailSystem(this);
 
 			diskCacheManager = new DiskCacheManager(this, config.getHomeDir().resolve("cache"));
+			newDiskCacheManager = new NewDiskCacheManager(this, config.getHomeDir().resolve("cache"));
 
 			mergerFactory = new MergerFactory(this);
 
@@ -476,10 +477,14 @@ public class BimServer {
 	 * both versions
 	 */
 	private void createDatabaseObjects(DatabaseSession session) throws BimserverLockConflictException, BimserverDatabaseException, PluginException, BimserverConcurrentModificationDatabaseException {
-		IfcModelInterface allOfType = session.getAllOfType(StorePackage.eINSTANCE.getUser(), Query.getDefault());
+		IfcModelInterface allOfType = session.getAllOfType(StorePackage.eINSTANCE.getUser(), OldQuery.getDefault());
 		for (User user : allOfType.getAll(User.class)) {
 			updateUserSettings(session, user);
 		}
+	}
+	
+	public NewDiskCacheManager getNewDiskCacheManager() {
+		return newDiskCacheManager;
 	}
 
 	private <T extends PluginConfiguration> T find(List<T> list, String name) {
@@ -617,10 +622,18 @@ public class BimServer {
 			}
 		}
 		for (MessagingSerializerPlugin serializerPlugin : pluginManager.getAllMessagingSerializerPlugins(true)) {
-			MessagingSerializerPluginConfiguration serializerPluginConfiguration = find(userSettings.getMessagingSerializerPlugins(), serializerPlugin.getClass().getName());
+			SerializerPluginConfiguration serializerPluginConfiguration = find(userSettings.getSerializers(), serializerPlugin.getClass().getName());
 			if (serializerPluginConfiguration == null) {
-				serializerPluginConfiguration = session.create(MessagingSerializerPluginConfiguration.class);
-				userSettings.getMessagingSerializerPlugins().add(serializerPluginConfiguration);
+				serializerPluginConfiguration = session.create(SerializerPluginConfiguration.class);
+				userSettings.getSerializers().add(serializerPluginConfiguration);
+				genericPluginConversion(session, serializerPlugin, serializerPluginConfiguration, getPluginDescriptor(session, serializerPlugin.getClass().getName()));
+			}
+		}
+		for (MessagingStreamingSerializerPlugin serializerPlugin : pluginManager.getAllMessagingStreamingSerializerPlugins(true)) {
+			SerializerPluginConfiguration serializerPluginConfiguration = find(userSettings.getSerializers(), serializerPlugin.getClass().getName());
+			if (serializerPluginConfiguration == null) {
+				serializerPluginConfiguration = session.create(SerializerPluginConfiguration.class);
+				userSettings.getSerializers().add(serializerPluginConfiguration);
 				genericPluginConversion(session, serializerPlugin, serializerPluginConfiguration, getPluginDescriptor(session, serializerPlugin.getClass().getName()));
 			}
 		}
@@ -644,6 +657,23 @@ public class BimServer {
 				deserializerPluginConfiguration = session.create(DeserializerPluginConfiguration.class);
 				userSettings.getDeserializers().add(deserializerPluginConfiguration);
 				genericPluginConversion(session, deserializerPlugin, deserializerPluginConfiguration, getPluginDescriptor(session, deserializerPlugin.getClass().getName()));
+			}
+		}
+		for (StreamingDeserializerPlugin streamingDeserializerPlugin : pluginManager.getAllStreamingDeserializerPlugins(true)) {
+			DeserializerPluginConfiguration streamingDeserializerPluginConfiguration = find(userSettings.getDeserializers(), streamingDeserializerPlugin.getClass().getName());
+			if (streamingDeserializerPluginConfiguration == null) {
+				streamingDeserializerPluginConfiguration = session.create(DeserializerPluginConfiguration.class);
+				userSettings.getDeserializers().add(streamingDeserializerPluginConfiguration);
+				genericPluginConversion(session, streamingDeserializerPlugin, streamingDeserializerPluginConfiguration, getPluginDescriptor(session, streamingDeserializerPlugin.getClass().getName()));
+			}
+		}
+		for (StreamingSerializerPlugin streamingSerializerPlugin : pluginManager.getAllStreamingSeserializerPlugins(true)) {
+			SerializerPluginConfiguration streamingSerializerPluginConfiguration = find(userSettings.getSerializers(), streamingSerializerPlugin.getClass().getName());
+			if (streamingSerializerPluginConfiguration == null) {
+				streamingSerializerPluginConfiguration = session.create(SerializerPluginConfiguration.class);
+				streamingSerializerPluginConfiguration.setStreaming(true);
+				userSettings.getSerializers().add(streamingSerializerPluginConfiguration);
+				genericPluginConversion(session, streamingSerializerPlugin, streamingSerializerPluginConfiguration, getPluginDescriptor(session, streamingSerializerPlugin.getClass().getName()));
 			}
 		}
 		session.store(userSettings);
@@ -706,7 +736,6 @@ public class BimServer {
 		notificationsManager.init();
 
 		getSerializerFactory().init(pluginManager, bimDatabase, this);
-		getDeserializerFactory().init(pluginManager, bimDatabase);
 		try {
 			DatabaseSession session = bimDatabase.createSession();
 			try {
@@ -753,7 +782,7 @@ public class BimServer {
 			session.store(serverSettings);
 			
 			Condition condition = new AttributeCondition(StorePackage.eINSTANCE.getUser_Username(), new StringLiteral("system"));
-			User systemUser = session.querySingle(condition, User.class, Query.getDefault());
+			User systemUser = session.querySingle(condition, User.class, OldQuery.getDefault());
 
 			ServerStarted serverStarted = session.create(ServerStarted.class);
 			serverStarted.setDate(new Date());
@@ -841,7 +870,7 @@ public class BimServer {
 		Collection<Plugin> allPlugins = pluginManager.getAllPlugins(false);
 		for (Plugin plugin : allPlugins) {
 			Condition pluginCondition = new AttributeCondition(StorePackage.eINSTANCE.getPluginDescriptor_PluginClassName(), new StringLiteral(plugin.getClass().getName()));
-			Map<Long, PluginDescriptor> results = session.query(pluginCondition, PluginDescriptor.class, Query.getDefault());
+			Map<Long, PluginDescriptor> results = session.query(pluginCondition, PluginDescriptor.class, OldQuery.getDefault());
 			if (results.size() == 0) {
 				PluginContext pluginContext = pluginManager.getPluginContext(plugin);
 				PluginDescriptor pluginDescriptor = session.create(PluginDescriptor.class);
@@ -912,7 +941,7 @@ public class BimServer {
 									for (Path x : PathUtils.list(f)) {
 										FileUtils.copyFile(x.toFile(), destDir2.resolve(x.getFileName().toString()).toFile());
 									}
-								} else if (Files.isDirectory(f)) {
+								} else {
 									FileUtils.copyFile(f.toFile(), destFile.resolve(f.getFileName().toString()).toFile());
 								}
 							}
@@ -978,10 +1007,6 @@ public class BimServer {
 
 	public SerializerFactory getSerializerFactory() {
 		return serializerFactory;
-	}
-
-	public DeserializerFactory getDeserializerFactory() {
-		return deserializerFactory;
 	}
 
 	public DiskCacheManager getDiskCacheManager() {

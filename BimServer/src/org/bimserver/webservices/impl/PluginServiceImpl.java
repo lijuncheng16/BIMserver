@@ -25,9 +25,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.bimserver.database.BimserverDatabaseException;
+import org.bimserver.BimserverDatabaseException;
 import org.bimserver.database.DatabaseSession;
-import org.bimserver.database.Query;
+import org.bimserver.database.OldQuery;
 import org.bimserver.database.actions.AddDeserializerDatabaseAction;
 import org.bimserver.database.actions.AddInternalServiceDatabaseAction;
 import org.bimserver.database.actions.AddModelCompareDatabaseAction;
@@ -113,8 +113,10 @@ import org.bimserver.models.store.UserSettings;
 import org.bimserver.models.store.WebModulePluginConfiguration;
 import org.bimserver.plugins.Plugin;
 import org.bimserver.plugins.deserializers.DeserializerPlugin;
+import org.bimserver.plugins.deserializers.StreamingDeserializerPlugin;
 import org.bimserver.plugins.objectidms.ObjectIDMPlugin;
 import org.bimserver.plugins.serializers.SerializerPlugin;
+import org.bimserver.plugins.serializers.StreamingSerializerPlugin;
 import org.bimserver.plugins.services.ServicePlugin;
 import org.bimserver.schemaconverter.SchemaConverterFactory;
 import org.bimserver.shared.exceptions.ServerException;
@@ -687,7 +689,7 @@ public class PluginServiceImpl extends GenericServiceImpl implements PluginInter
 	public SObjectDefinition getPluginObjectDefinition(Long oid) throws ServerException, UserException {
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			PluginDescriptor pluginDescriptor = session.get(oid, Query.getDefault());
+			PluginDescriptor pluginDescriptor = session.get(oid, OldQuery.getDefault());
 			if (pluginDescriptor == null) {
 				throw new UserException("No PluginDescriptor found with oid " + oid);
 			}
@@ -719,7 +721,7 @@ public class PluginServiceImpl extends GenericServiceImpl implements PluginInter
 
 		session = getBimServer().getDatabase().createSession();
 		try {
-			PluginConfiguration pluginConfiguration = session.get(StorePackage.eINSTANCE.getPluginConfiguration(), poid, Query.getDefault());
+			PluginConfiguration pluginConfiguration = session.get(StorePackage.eINSTANCE.getPluginConfiguration(), poid, OldQuery.getDefault());
 			ServicePlugin servicePlugin = getBimServer().getPluginManager().getServicePlugin(pluginConfiguration.getPluginDescriptor().getPluginClassName(), true);
 			SInternalServicePluginConfiguration sInternalService = (SInternalServicePluginConfiguration) getBimServer().getSConverter().convertToSObject(pluginConfiguration);
 	
@@ -872,7 +874,7 @@ public class PluginServiceImpl extends GenericServiceImpl implements PluginInter
 	public SObjectType getPluginSettings(Long poid) throws ServerException, UserException {
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			PluginConfiguration pluginConfiguration = session.get(StorePackage.eINSTANCE.getPluginConfiguration(), poid, Query.getDefault());
+			PluginConfiguration pluginConfiguration = session.get(StorePackage.eINSTANCE.getPluginConfiguration(), poid, OldQuery.getDefault());
 			ObjectType settings = pluginConfiguration.getSettings();
 			return getBimServer().getSConverter().convertToSObject(settings);
 		} catch (Exception e) {
@@ -932,7 +934,7 @@ public class PluginServiceImpl extends GenericServiceImpl implements PluginInter
 		try {
 			Set<Schema> uniqueSchemas = new HashSet<>();
 			for (Long roid : roids) {
-				Revision revision = session.get(roid, Query.getDefault());
+				Revision revision = session.get(roid, OldQuery.getDefault());
 				for (ConcreteRevision concreteRevision : revision.getConcreteRevisions()) {
 					uniqueSchemas.add(Schema.valueOf(concreteRevision.getProject().getSchema().toUpperCase()));
 				}
@@ -970,9 +972,20 @@ public class PluginServiceImpl extends GenericServiceImpl implements PluginInter
 			UserSettings userSettings = getUserSettings(session);
 			List<SSerializerPluginConfiguration> sSerializers = new ArrayList<SSerializerPluginConfiguration>();
 			for (SerializerPluginConfiguration serializerPluginConfiguration : userSettings.getSerializers()) {
-				SerializerPlugin plugin = getBimServer().getPluginManager().getSerializerPlugin(serializerPluginConfiguration.getPluginDescriptor().getPluginClassName(), true);
-				if (plugin != null) {
-					for (Schema schema : plugin.getSupportedSchemas()) {
+				Plugin plugin = getBimServer().getPluginManager().getPlugin(serializerPluginConfiguration.getPluginDescriptor().getPluginClassName(), true);
+				if (plugin instanceof SerializerPlugin) {
+					SerializerPlugin serializerPlugin = getBimServer().getPluginManager().getSerializerPlugin(serializerPluginConfiguration.getPluginDescriptor().getPluginClassName(), true);
+					for (Schema schema : serializerPlugin.getSupportedSchemas()) {
+						if (schemaOr.contains(schema)) {
+							if (!onlyEnabled || (serializerPluginConfiguration.getEnabled() && serializerPluginConfiguration.getPluginDescriptor().getEnabled())) {
+								sSerializers.add(getBimServer().getSConverter().convertToSObject(serializerPluginConfiguration));
+								break;
+							}
+						}
+					}
+				} else if (plugin instanceof StreamingSerializerPlugin) {
+					StreamingSerializerPlugin streamingSerializerPlugin = (StreamingSerializerPlugin)plugin;
+					for (Schema schema : streamingSerializerPlugin.getSupportedSchemas()) {
 						if (schemaOr.contains(schema)) {
 							if (!onlyEnabled || (serializerPluginConfiguration.getEnabled() && serializerPluginConfiguration.getPluginDescriptor().getEnabled())) {
 								sSerializers.add(getBimServer().getSConverter().convertToSObject(serializerPluginConfiguration));
@@ -1249,7 +1262,7 @@ public class PluginServiceImpl extends GenericServiceImpl implements PluginInter
 	public SPluginDescriptor getPluginDescriptor(Long oid) throws ServerException, UserException {
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			PluginDescriptor pluginDescriptor = session.get(oid, Query.getDefault());
+			PluginDescriptor pluginDescriptor = session.get(oid, OldQuery.getDefault());
 			return getBimServer().getSConverter().convertToSObject(pluginDescriptor);
 		} catch (Exception e) {
 			return handleException(e);
@@ -1263,16 +1276,27 @@ public class PluginServiceImpl extends GenericServiceImpl implements PluginInter
 		requireRealUserAuthentication();
 		DatabaseSession session = getBimServer().getDatabase().createSession();
 		try {
-			Project project = session.get(poid, Query.getDefault());
+			Project project = session.get(poid, OldQuery.getDefault());
 
 			UserSettings userSettings = getUserSettings(session);
 			EList<DeserializerPluginConfiguration> deserializers = userSettings.getDeserializers();
 			List<SDeserializerPluginConfiguration> sDeserializers = new ArrayList<SDeserializerPluginConfiguration>();
 			for (DeserializerPluginConfiguration deserializerPluginConfiguration : deserializers) {
 				DeserializerPlugin plugin = getBimServer().getPluginManager().getDeserializerPlugin(deserializerPluginConfiguration.getPluginDescriptor().getPluginClassName(), true);
-				if (plugin != null && plugin.getSupportedSchemas().contains(Schema.valueOf(project.getSchema().toUpperCase()))) {
-					if (!onlyEnabled || (deserializerPluginConfiguration.getEnabled() && deserializerPluginConfiguration.getPluginDescriptor().getEnabled())) {
-						sDeserializers.add(getBimServer().getSConverter().convertToSObject(deserializerPluginConfiguration));
+				if (plugin == null) {
+					StreamingDeserializerPlugin streamingPlugin = getBimServer().getPluginManager().getStreamingDeserializerPlugin(deserializerPluginConfiguration.getPluginDescriptor().getPluginClassName(), true);
+					if (streamingPlugin != null) {
+						if (streamingPlugin.getSupportedSchemas().contains(Schema.valueOf(project.getSchema().toUpperCase()))) {
+							if (!onlyEnabled || (deserializerPluginConfiguration.getEnabled() && deserializerPluginConfiguration.getPluginDescriptor().getEnabled())) {
+								sDeserializers.add(getBimServer().getSConverter().convertToSObject(deserializerPluginConfiguration));
+							}
+						}
+					}
+				} else {
+					if (plugin.getSupportedSchemas().contains(Schema.valueOf(project.getSchema().toUpperCase()))) {
+						if (!onlyEnabled || (deserializerPluginConfiguration.getEnabled() && deserializerPluginConfiguration.getPluginDescriptor().getEnabled())) {
+							sDeserializers.add(getBimServer().getSConverter().convertToSObject(deserializerPluginConfiguration));
+						}
 					}
 				}
 			}
