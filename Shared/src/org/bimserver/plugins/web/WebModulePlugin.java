@@ -14,7 +14,7 @@ package org.bimserver.plugins.web;
  * GNU Affero General Public License for more details.
  * 
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see {@literal<http://www.gnu.org/licenses/>}.
  *****************************************************************************/
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +26,7 @@ public interface WebModulePlugin extends Plugin {
 	/**
 	 * Handles the individual requests, just like a servlet
 	 * 
-	 * @param request The HTTP request
+	 * @param requestUrl Request URL
 	 * @param response The HTTP response
 	 */
 	boolean service(String requestUrl, HttpServletResponse response);

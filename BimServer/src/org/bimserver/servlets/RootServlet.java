@@ -1,7 +1,7 @@
 package org.bimserver.servlets;
 
 /******************************************************************************
- * Copyright (C) 2009-2015  BIMserver.org
+ * Copyright (C) 2009-2016  BIMserver.org
  * 
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,7 @@ package org.bimserver.servlets;
  * GNU Affero General Public License for more details.
  * 
  * You should have received a copy of the GNU Affero General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see {@literal<http://www.gnu.org/licenses/>}.
  *****************************************************************************/
 
 import java.io.IOException;
@@ -102,8 +102,6 @@ public class RootServlet extends HttpServlet {
 				return;
 			} else if (requestUri.startsWith("/stream")) {
 				LOGGER.warn("Stream request should not be going to this servlet!");
-			} else if (requestUri.startsWith("/openid")) {
-				bimServer.getOpenIdManager().verifyResponse(request, response);
 			} else if (requestUri.startsWith("/soap11/") || requestUri.equals("/soap11")) {
 				soap11Servlet.service(request, response);
 			} else if (requestUri.startsWith("/soap12/") || requestUri.equals("/soap12")) {

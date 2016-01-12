@@ -1,9 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>OpensourceBIM</groupId>
+	<groupId>org.opensourcebim</groupId>
 	<artifactId>BimServer</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.5.0-SNAPSHOT</version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<build>
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
@@ -25,22 +28,142 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
 				<configuration>
-					<source />
-					<target />
+					<source>1.8</source>
+					<target>1.8</target>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>build-helper-maven-plugin</artifactId>
+				<version>1.10</version>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sources>
+								<source>generated</source>
+							</sources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<webResources>
+						<resource>
+							<directory>emailtemplates</directory>
+							<targetPath>WEB-INF</targetPath>
+						</resource>
+						<resource>
+							<directory>.</directory>
+							<includes>
+								<include>license.txt</include>
+							</includes>
+							<targetPath>/</targetPath>
+						</resource>
+						<resource>
+							<directory>deploy</directory>
+							<targetPath>WEB-INF</targetPath>
+						</resource>
+					</webResources>
+					<webXml>www/WEB-INF/web.xml</webXml>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.3</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>false</autoReleaseAfterClose>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+					<releaseProfiles>release</releaseProfiles>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>de.jutzig</groupId>
+						<artifactId>github-release-plugin</artifactId>
+						<version>1.1.0</version>
+						<executions>
+							<execution>
+								<id>github</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>release</goal>
+								</goals>
+								<inherited>false</inherited>
+								<configuration>
+									<releaseName>${project.version}</releaseName>
+									<tag>${project.version}</tag>
+									<artifact>${project.build.directory}/${project.artifactId}-${project.version}.war</artifact>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 	<dependencies>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-server</artifactId>
 			<version>9.3.6.v20151106</version>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.jetty</groupId>
-			<artifactId>jetty-websocket</artifactId>
-			<version>8.1.18.v20150929</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty.websocket</groupId>
@@ -51,16 +174,6 @@
 			<groupId>org.eclipse.jetty</groupId>
 			<artifactId>jetty-webapp</artifactId>
 			<version>9.3.6.v20151106</version>
-		</dependency>
-		<dependency>
-			<groupId>org.openid4java</groupId>
-			<artifactId>openid4java</artifactId>
-			<version>1.0.0</version>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<version>1.2.17</version>
 		</dependency>
 		<dependency>
 			<groupId>commons-fileupload</groupId>
@@ -92,20 +205,23 @@
 			<artifactId>rome</artifactId>
 			<version>1.5.1</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
 			<version>2.2.2</version>
 		</dependency>
-
 		<dependency>
-			<groupId>OpensourceBIM</groupId>
-			<artifactId>Shared</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-core</artifactId>
+			<version>1.1.3</version>
 		</dependency>
 		<dependency>
-			<groupId>OpensourceBIM</groupId>
+			<groupId>ch.qos.logback</groupId>
+			<artifactId>logback-classic</artifactId>
+			<version>1.1.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.opensourcebim</groupId>
 			<artifactId>BimServerClientLib</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
@@ -124,6 +240,16 @@
 			<artifactId>jettison</artifactId>
 			<version>1.3.7</version>
 		</dependency>
+		<dependency>
+			<groupId>com.thetransactioncompany</groupId>
+			<artifactId>cors-filter</artifactId>
+			<version>2.5</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse.jetty.websocket</groupId>
+			<artifactId>websocket-server</artifactId>
+			<version>9.3.6.v20151106</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
@@ -133,4 +259,19 @@
 			<layout>default</layout>
 		</repository>
 	</repositories>
+	<name>BimServer</name>
+	<organization>
+		<name>OpenSource BIM</name>
+		<url>opensourcebim.org</url>
+	</organization>
+	<scm>
+		<url>scm:git:https://github.com/opensourceBIM/BIMserver.git</url>
+		<developerConnection>scm:git:https://github.com/opensourceBIM/BIMserver.git</developerConnection>
+		<connection>opensourceBIM/BIMserver</connection>
+	</scm>
+	<issueManagement>
+		<system>GitHub</system>
+		<url>https://github.com/opensourceBIM/BIMserver/issues</url>
+	</issueManagement>
+	<description>Testing releases...</description>
 </project>
