@@ -47,9 +47,6 @@ import org.bimserver.plugins.objectidms.ObjectIDMPlugin;
 import org.bimserver.plugins.queryengine.QueryEnginePlugin;
 import org.bimserver.plugins.renderengine.RenderEngineException;
 import org.bimserver.plugins.renderengine.RenderEnginePlugin;
-import org.bimserver.plugins.schema.SchemaDefinition;
-import org.bimserver.plugins.schema.SchemaException;
-import org.bimserver.plugins.schema.SchemaPlugin;
 import org.bimserver.plugins.serializers.MessagingSerializerPlugin;
 import org.bimserver.plugins.serializers.MessagingStreamingSerializerPlugin;
 import org.bimserver.plugins.serializers.SerializerPlugin;
@@ -65,13 +62,19 @@ import org.bimserver.shared.AuthenticationInfo;
 import org.bimserver.shared.BimServerClientFactory;
 import org.bimserver.shared.ChannelConnectionException;
 import org.bimserver.shared.ServiceFactory;
+import org.bimserver.shared.exceptions.PluginException;
 import org.bimserver.shared.exceptions.ServiceException;
 import org.bimserver.shared.meta.SServicesMap;
 import org.bimserver.utils.PathUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PluginManager {
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+public class PluginManager implements PluginManagerInterface {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PluginManager.class);
 	private final Map<Class<? extends Plugin>, Set<PluginContext>> implementations = new LinkedHashMap<Class<? extends Plugin>, Set<PluginContext>>();
 	private final Map<Plugin, PluginContext> pluginToPluginContext = new HashMap<>();
@@ -112,7 +115,7 @@ public class PluginManager {
 		if (!Files.isDirectory(projectRoot)) {
 			throw new PluginException("No directory: " + projectRoot.toString());
 		}
-		Path pluginFolder = projectRoot.resolve("plugin");
+		final Path pluginFolder = projectRoot.resolve("plugin");
 		if (!Files.isDirectory(pluginFolder)) {
 			throw new PluginException("No 'plugin' directory found in " + projectRoot.toString());
 		}
@@ -153,7 +156,20 @@ public class PluginManager {
 			EclipsePluginClassloader pluginClassloader = new EclipsePluginClassloader(delegatingClassLoader, projectRoot);
 //			pluginClassloader.dumpStructure(0);
 			loadedLocations.add(projectRoot);
-			loadPlugins(pluginClassloader, projectRoot.toUri(), projectRoot.resolve("bin").toString(), pluginDescriptor, PluginSourceType.ECLIPSE_PROJECT);
+			
+			ResourceLoader resourceLoader = new ResourceLoader() {
+				@Override
+				public InputStream load(String name) {
+					try {
+						return Files.newInputStream(pluginFolder.resolve(name));
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					return null;
+				}
+			};
+			
+			loadPlugins(resourceLoader, pluginClassloader, projectRoot.toUri(), projectRoot.resolve("bin").toString(), pluginDescriptor, PluginSourceType.ECLIPSE_PROJECT);
 		} catch (JAXBException e) {
 			throw new PluginException(e);
 		} catch (FileNotFoundException e) {
@@ -182,30 +198,43 @@ public class PluginManager {
 	}
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private void loadPlugins(ClassLoader classLoader, URI location, String classLocation, PluginDescriptor pluginDescriptor, PluginSourceType pluginType) throws PluginException {
+	private void loadPlugins(ResourceLoader resourceLoader, ClassLoader classLoader, URI location, String classLocation, PluginDescriptor pluginDescriptor, PluginSourceType pluginType) throws PluginException {
 		for (PluginImplementation pluginImplementation : pluginDescriptor.getImplementations()) {
 			if (pluginImplementation.isEnabled()) {
 				String interfaceClassName = pluginImplementation.getInterfaceClass().trim().replace("\n", "");
 				try {
 					Class interfaceClass = classLoader.loadClass(interfaceClassName);
-					String implementationClassName = pluginImplementation.getImplementationClass().trim().replace("\n", "");
-					try {
-						Class implementationClass = classLoader.loadClass(implementationClassName);
-						Plugin plugin = (Plugin) implementationClass.newInstance();
-						loadPlugin(interfaceClass, location, classLocation, plugin, classLoader, pluginType, pluginImplementation);
-					} catch (NoClassDefFoundError e) {
-						throw new PluginException("Implementation class '" + implementationClassName + "' not found", e);
-					} catch (ClassNotFoundException e) {
-						throw new PluginException("Implementation class '" + implementationClassName + "' not found in " + location, e);
-					} catch (InstantiationException e) {
-						throw new PluginException(e);
-					} catch (IllegalAccessException e) {
-						throw new PluginException(e);
+					if (pluginImplementation.getImplementationClass() != null) {
+						String implementationClassName = pluginImplementation.getImplementationClass().trim().replace("\n", "");
+						try {
+							Class implementationClass = classLoader.loadClass(implementationClassName);
+							Plugin plugin = (Plugin) implementationClass.newInstance();
+							loadPlugin(interfaceClass, location, classLocation, plugin, classLoader, pluginType, pluginImplementation);
+						} catch (NoClassDefFoundError e) {
+							throw new PluginException("Implementation class '" + implementationClassName + "' not found", e);
+						} catch (ClassNotFoundException e) {
+							throw new PluginException("Implementation class '" + implementationClassName + "' not found in " + location, e);
+						} catch (InstantiationException e) {
+							throw new PluginException(e);
+						} catch (IllegalAccessException e) {
+							throw new PluginException(e);
+						}
+					} else if (pluginImplementation.getImplementationJson() != null) {
+						ObjectMapper objectMapper = new ObjectMapper();
+						ObjectNode settings = objectMapper.readValue(resourceLoader.load(pluginImplementation.getImplementationJson()), ObjectNode.class);
+						JsonWebModule jsonWebModule = new JsonWebModule(settings);
+						loadPlugin(interfaceClass, location, classLocation, jsonWebModule, classLoader, pluginType, pluginImplementation);
 					}
 				} catch (ClassNotFoundException e) {
 					throw new PluginException("Interface class '" + interfaceClassName + "' not found", e);
 				} catch (Error e) {
 					throw new PluginException(e);
+				} catch (JsonParseException e) {
+					e.printStackTrace();
+				} catch (JsonMappingException e) {
+					e.printStackTrace();
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
 			} else {
 				LOGGER.info("Plugin " + pluginImplementation.getImplementationClass() + " is disabled in plugin.xml");
@@ -248,7 +277,7 @@ public class PluginManager {
 			throw new PluginException("Not a file: " + file.toString());
 		}
 		try {
-			FileJarClassLoader jarClassLoader = new FileJarClassLoader(this, getClass().getClassLoader(), file);
+			final FileJarClassLoader jarClassLoader = new FileJarClassLoader(this, getClass().getClassLoader(), file);
 			InputStream pluginStream = jarClassLoader.getResourceAsStream("plugin/plugin.xml");
 			if (pluginStream == null) {
 				throw new PluginException("No plugin/plugin.xml found in " + file.getFileName().toString());
@@ -261,7 +290,15 @@ public class PluginManager {
 			loadedLocations.add(file);
 			URI fileUri = file.toAbsolutePath().toUri();
 			URI jarUri = new URI("jar:" + fileUri.toString());
-			loadPlugins(jarClassLoader, jarUri, file.toAbsolutePath().toString(), pluginDescriptor, PluginSourceType.JAR_FILE);
+			
+			ResourceLoader resourceLoader = new ResourceLoader() {
+				@Override
+				public InputStream load(String name) {
+					return jarClassLoader.getResourceAsStream(name);
+				}
+			};
+			
+			loadPlugins(resourceLoader, jarClassLoader, jarUri, file.toAbsolutePath().toString(), pluginDescriptor, PluginSourceType.JAR_FILE);
 		} catch (JAXBException e) {
 			throw new PluginException(e);
 		} catch (FileNotFoundException e) {
@@ -351,7 +388,15 @@ public class PluginManager {
 				URL url = resources.nextElement();
 				LOGGER.info("Loading " + url);
 				PluginDescriptor pluginDescriptor = getPluginDescriptor(url.openStream());
-				loadPlugins(getClass().getClassLoader(), url.toURI(), url.toString(), pluginDescriptor, PluginSourceType.INTERNAL);
+				
+				ResourceLoader resourceLoader = new ResourceLoader() {
+					@Override
+					public InputStream load(String name) {
+						return getClass().getClassLoader().getResourceAsStream(name);
+					}
+				};
+				
+				loadPlugins(resourceLoader, getClass().getClassLoader(), url.toURI(), url.toString(), pluginDescriptor, PluginSourceType.INTERNAL);
 			}
 		} catch (IOException e) {
 			LOGGER.error("", e);
@@ -423,26 +468,6 @@ public class PluginManager {
 		return allDeserializerPlugins;
 	}
 
-	public Collection<SchemaPlugin> getAllSchemaPlugins(boolean onlyEnabled) {
-		return getPlugins(SchemaPlugin.class, onlyEnabled);
-	}
-	
-	public SchemaDefinition requireSchemaDefinition(String name) throws PluginException {
-		Collection<SchemaPlugin> allSchemaPlugins = getAllSchemaPlugins(true);
-		if (allSchemaPlugins.size() == 0) {
-			throw new SchemaException("No schema plugins found");
-		}
-		for (SchemaPlugin schemaPlugin : allSchemaPlugins) {
-			if (!schemaPlugin.isInitialized()) {
-				schemaPlugin.init(this);
-			}
-			if (schemaPlugin.getSchemaVersion().toLowerCase().equals(name.toLowerCase())) {
-				return schemaPlugin.getSchemaDefinition(new PluginConfiguration());
-			}
-		}
-		throw new PluginException("No schema definition found for " + name);
-	}
-	
 	public DeserializerPlugin requireDeserializer(String extension) throws DeserializeException {
 		Collection<DeserializerPlugin> allDeserializerPlugins = getAllDeserializerPlugins(extension, true);
 		if (allDeserializerPlugins.size() == 0) {
@@ -547,22 +572,6 @@ public class PluginManager {
 			throw new PluginException("No deserializers with extension " + extension + " found");
 		}
 		return allDeserializerPlugins.iterator().next();
-	}
-
-	public SchemaPlugin getFirstSchemaPlugin(String schema, boolean onlyEnabled) throws PluginException {
-		Collection<SchemaPlugin> allSchemaPlugins = getAllSchemaPlugins(onlyEnabled);
-		if (allSchemaPlugins.size() == 0) {
-			throw new PluginException("No schema plugins found");
-		}
-		for (SchemaPlugin schemaPlugin : allSchemaPlugins) {
-			if (schemaPlugin.getSchemaVersion().equals(schema)) {
-				if (!schemaPlugin.isInitialized()) {
-					schemaPlugin.init(this);
-				}
-				return schemaPlugin;
-			}
-		}
-		return null;
 	}
 
 	public ObjectIDMPlugin getObjectIDMByName(String className, boolean onlyEnabled) {

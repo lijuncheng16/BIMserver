@@ -5,10 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
-import java.nio.charset.UnsupportedCharsetException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
@@ -23,8 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 import org.bimserver.BimserverDatabaseException;
 import org.bimserver.database.MetricCollector;
 import org.bimserver.emf.MetaDataException;
@@ -36,10 +30,6 @@ import org.bimserver.plugins.deserializers.ByteProgressReporter;
 import org.bimserver.plugins.deserializers.DatabaseInterface;
 import org.bimserver.plugins.deserializers.DeserializeException;
 import org.bimserver.plugins.deserializers.StreamingDeserializer;
-import org.bimserver.plugins.schema.Attribute;
-import org.bimserver.plugins.schema.EntityDefinition;
-import org.bimserver.plugins.schema.ExplicitAttribute;
-import org.bimserver.plugins.services.BimServerClientException;
 import org.bimserver.shared.ByteBufferVirtualObject;
 import org.bimserver.shared.ByteBufferWrappedVirtualObject;
 import org.bimserver.shared.ListWaitingVirtualObject;
@@ -48,6 +38,7 @@ import org.bimserver.shared.SingleWaitingVirtualObject;
 import org.bimserver.shared.VirtualObject;
 import org.bimserver.shared.WaitingListVirtualObject;
 import org.bimserver.shared.WrappedVirtualObject;
+import org.bimserver.shared.exceptions.BimServerClientException;
 import org.bimserver.utils.FakeClosingInputStream;
 import org.bimserver.utils.StringUtils;
 import org.bimserver.utils.TokenizeException;
@@ -63,6 +54,10 @@ import org.eclipse.emf.ecore.impl.EClassImpl;
 import org.eclipse.emf.ecore.impl.EEnumImpl;
 
 import com.google.common.base.Charsets;
+
+import nl.tue.buildingsmart.schema.Attribute;
+import nl.tue.buildingsmart.schema.EntityDefinition;
+import nl.tue.buildingsmart.schema.ExplicitAttribute;
 
 public abstract class IfcStepStreamingDeserializer implements StreamingDeserializer {
 	private ByteProgressReporter byteProgressReporter;

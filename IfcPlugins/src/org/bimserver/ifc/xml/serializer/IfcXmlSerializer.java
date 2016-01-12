@@ -31,18 +31,8 @@ import org.bimserver.emf.IfcModelInterface;
 import org.bimserver.emf.PackageMetaData;
 import org.bimserver.ifc.IfcSerializer;
 import org.bimserver.models.ifc2x3tc1.Tristate;
-import org.bimserver.plugins.PluginManager;
-import org.bimserver.plugins.renderengine.RenderEnginePlugin;
-import org.bimserver.plugins.schema.Attribute;
-import org.bimserver.plugins.schema.BaseType;
-import org.bimserver.plugins.schema.DefinedType;
-import org.bimserver.plugins.schema.EntityDefinition;
-import org.bimserver.plugins.schema.ExplicitAttribute;
-import org.bimserver.plugins.schema.IntegerType;
-import org.bimserver.plugins.schema.ListType;
-import org.bimserver.plugins.schema.RealType;
-import org.bimserver.plugins.schema.SetType;
-import org.bimserver.plugins.schema.StringType;
+import org.bimserver.models.store.StringType;
+import org.bimserver.plugins.PluginManagerInterface;
 import org.bimserver.plugins.serializers.ProgressReporter;
 import org.bimserver.plugins.serializers.ProjectInfo;
 import org.bimserver.plugins.serializers.SerializerException;
@@ -58,6 +48,16 @@ import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 import org.eclipse.emf.ecore.EcorePackage;
 
+import nl.tue.buildingsmart.schema.Attribute;
+import nl.tue.buildingsmart.schema.BaseType;
+import nl.tue.buildingsmart.schema.DefinedType;
+import nl.tue.buildingsmart.schema.EntityDefinition;
+import nl.tue.buildingsmart.schema.ExplicitAttribute;
+import nl.tue.buildingsmart.schema.IntegerType;
+import nl.tue.buildingsmart.schema.ListType;
+import nl.tue.buildingsmart.schema.RealType;
+import nl.tue.buildingsmart.schema.SetType;
+
 public abstract class IfcXmlSerializer extends IfcSerializer {
 
 	private PrintWriter out;
@@ -65,8 +65,8 @@ public abstract class IfcXmlSerializer extends IfcSerializer {
 	private int tabs;
 
 	@Override
-	public void init(IfcModelInterface model, ProjectInfo projectInfo, PluginManager pluginManager, RenderEnginePlugin renderEnginePlugin, PackageMetaData packageMetaData, boolean normalizeOids) throws SerializerException {
-		super.init(model, projectInfo, pluginManager, renderEnginePlugin, packageMetaData, normalizeOids);
+	public void init(IfcModelInterface model, ProjectInfo projectInfo, PluginManagerInterface pluginManager, PackageMetaData packageMetaData, boolean normalizeOids) throws SerializerException {
+		super.init(model, projectInfo, pluginManager, packageMetaData, normalizeOids);
 		objectToOidMap = new HashMap<EObject, Long>((int) model.size());
 		for (Long key : model.keySet()) {
 			objectToOidMap.put(model.get(key), key);

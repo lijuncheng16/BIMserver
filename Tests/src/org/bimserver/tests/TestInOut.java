@@ -1,6 +1,5 @@
 package org.bimserver.tests;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,10 +20,10 @@ import org.bimserver.interfaces.objects.SSerializerPluginConfiguration;
 import org.bimserver.models.log.AccessMethod;
 import org.bimserver.models.store.ServerState;
 import org.bimserver.plugins.OptionsParser;
-import org.bimserver.plugins.PluginException;
 import org.bimserver.plugins.services.BimServerClientInterface;
 import org.bimserver.shared.LocalDevelopmentResourceFetcher;
-import org.bimserver.shared.PublicInterfaceNotFoundException;
+import org.bimserver.shared.exceptions.PluginException;
+import org.bimserver.shared.exceptions.PublicInterfaceNotFoundException;
 import org.bimserver.shared.exceptions.ServerException;
 import org.bimserver.shared.exceptions.UserException;
 import org.bimserver.shared.interfaces.AdminInterface;

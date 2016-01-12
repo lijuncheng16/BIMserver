@@ -16,6 +16,7 @@
 			</arguments>
 		</buildCommand>
 		<buildCommand>
+<<<<<<< HEAD
 			<name>org.eclipse.ui.externaltools.ExternalToolBuilder</name>
 			<triggers>full,incremental,</triggers>
 			<arguments>
@@ -23,10 +24,15 @@
 					<key>LaunchConfigHandle</key>
 					<value>&lt;project&gt;/.externalToolBuilders/New_Builder.launch</value>
 				</dictionary>
+=======
+			<name>org.eclipse.m2e.core.maven2Builder</name>
+			<arguments>
+>>>>>>> refs/remotes/opensourceBIM/master
 			</arguments>
 		</buildCommand>
 	</buildSpec>
 	<natures>
+		<nature>org.eclipse.m2e.core.maven2Nature</nature>
 		<nature>org.eclipse.emf.codegen.jet.IJETNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
 	</natures>

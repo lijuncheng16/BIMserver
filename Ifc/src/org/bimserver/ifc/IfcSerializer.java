@@ -19,27 +19,15 @@ package org.bimserver.ifc;
 
 import org.bimserver.emf.IfcModelInterface;
 import org.bimserver.emf.PackageMetaData;
-import org.bimserver.plugins.PluginManager;
-import org.bimserver.plugins.renderengine.RenderEnginePlugin;
-import org.bimserver.plugins.schema.SchemaDefinition;
+import org.bimserver.plugins.PluginManagerInterface;
 import org.bimserver.plugins.serializers.EmfSerializer;
 import org.bimserver.plugins.serializers.ProjectInfo;
 import org.bimserver.plugins.serializers.SerializerException;
 
 public abstract class IfcSerializer extends EmfSerializer {
 
-	private SchemaDefinition schemaDefinition;
-
 	@Override
-	public void init(IfcModelInterface model, ProjectInfo projectInfo, PluginManager pluginManager, RenderEnginePlugin renderEnginePlugin, PackageMetaData packageMetaData, boolean normalizeOids) throws SerializerException {
-		super.init(model, projectInfo, pluginManager, renderEnginePlugin, packageMetaData, normalizeOids);
-	}
-	
-	protected void setSchema(SchemaDefinition schemaDefinition) {
-		this.schemaDefinition = schemaDefinition;
-	}
-	
-	protected SchemaDefinition getSchemaDefinition() {
-		return schemaDefinition;
+	public void init(IfcModelInterface model, ProjectInfo projectInfo, PluginManagerInterface pluginManager, PackageMetaData packageMetaData, boolean normalizeOids) throws SerializerException {
+		super.init(model, projectInfo, pluginManager, packageMetaData, normalizeOids);
 	}
 }

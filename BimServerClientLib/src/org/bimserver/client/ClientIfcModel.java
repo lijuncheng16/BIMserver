@@ -51,9 +51,9 @@ import org.bimserver.models.ifc2x3tc1.IfcProduct;
 import org.bimserver.models.ifc2x3tc1.IfcRoot;
 import org.bimserver.plugins.deserializers.DeserializeException;
 import org.bimserver.plugins.serializers.SerializerInputstream;
-import org.bimserver.plugins.services.BimServerClientException;
-import org.bimserver.shared.PublicInterfaceNotFoundException;
 import org.bimserver.shared.QueryException;
+import org.bimserver.shared.exceptions.BimServerClientException;
+import org.bimserver.shared.exceptions.PublicInterfaceNotFoundException;
 import org.bimserver.shared.exceptions.ServerException;
 import org.bimserver.shared.exceptions.ServiceException;
 import org.bimserver.shared.exceptions.UserException;
@@ -385,7 +385,7 @@ public class ClientIfcModel extends IfcModel {
 				geometryInfo.setMinBounds(minBounds);
 				geometryInfo.setMaxBounds(maxBounds);
 				
-				byte[] transformation = new byte[16 * 4];
+				byte[] transformation = new byte[16 * 8];
 				dataInputStream.readFully(transformation);
 				geometryInfo.setTransformation(transformation);
 				

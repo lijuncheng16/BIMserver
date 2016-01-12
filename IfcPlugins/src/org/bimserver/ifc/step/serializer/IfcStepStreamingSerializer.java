@@ -31,9 +31,7 @@ import org.bimserver.emf.PackageMetaData;
 import org.bimserver.ifc.step.deserializer.IfcParserWriterUtils;
 import org.bimserver.models.store.IfcHeader;
 import org.bimserver.plugins.PluginConfiguration;
-import org.bimserver.plugins.PluginManager;
-import org.bimserver.plugins.schema.EntityDefinition;
-import org.bimserver.plugins.schema.SchemaDefinition;
+import org.bimserver.plugins.PluginManagerInterface;
 import org.bimserver.plugins.serializers.ObjectProvider;
 import org.bimserver.plugins.serializers.OidConvertingSerializer;
 import org.bimserver.plugins.serializers.ProjectInfo;
@@ -57,6 +55,9 @@ import org.eclipse.emf.ecore.EcorePackage;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Charsets;
+
+import nl.tue.buildingsmart.schema.EntityDefinition;
+import nl.tue.buildingsmart.schema.SchemaDefinition;
 
 public abstract class IfcStepStreamingSerializer implements StreamingSerializer, StreamingReader, OidConvertingSerializer {
 	private static final byte[] NEW_LINE = "\n".getBytes(Charsets.UTF_8);
@@ -136,7 +137,7 @@ public abstract class IfcStepStreamingSerializer implements StreamingSerializer,
 	}
 
 	@Override
-	public void init(ObjectProvider objectProvider, ProjectInfo projectInfo, IfcHeader ifcHeader, PluginManager pluginManager, PackageMetaData packageMetaData) throws SerializerException {
+	public void init(ObjectProvider objectProvider, ProjectInfo projectInfo, IfcHeader ifcHeader, PluginManagerInterface pluginManager, PackageMetaData packageMetaData) throws SerializerException {
 		this.objectProvider = objectProvider;
 		this.projectInfo = projectInfo;
 		this.ifcHeader = ifcHeader;

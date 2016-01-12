@@ -22,7 +22,6 @@ import org.bimserver.models.ifc2x3tc1.IfcRepresentation;
 import org.bimserver.models.ifc2x3tc1.IfcShapeRepresentation;
 import org.bimserver.models.ifc2x3tc1.IfcSpace;
 import org.bimserver.plugins.ModelHelper;
-import org.bimserver.plugins.PluginException;
 import org.bimserver.plugins.PluginManager;
 import org.bimserver.plugins.deserializers.DeserializeException;
 import org.bimserver.plugins.deserializers.Deserializer;
@@ -32,6 +31,7 @@ import org.bimserver.plugins.serializers.Serializer;
 import org.bimserver.plugins.serializers.SerializerException;
 import org.bimserver.plugins.serializers.SerializerPlugin;
 import org.bimserver.shared.IncrementingOidProvider;
+import org.bimserver.shared.exceptions.PluginException;
 import org.bimserver.utils.CollectionUtils;
 
 public class AddFurniture {
@@ -55,7 +55,7 @@ public class AddFurniture {
 
 			IfcFurnishingElement picknick = (IfcFurnishingElement) furnishingModel.getByName(Ifc2x3tc1Package.eINSTANCE.getIfcFurnishingElement(), "Picknik Bank");
 
-			ModelHelper modelHelper = new ModelHelper(pluginManager.getMetaDataManager(), new HideAllInversesObjectIDM(CollectionUtils.singleSet(Ifc2x3tc1Package.eINSTANCE), pluginManager.requireSchemaDefinition("ifc2x3tc1")), model);
+			ModelHelper modelHelper = new ModelHelper(pluginManager.getMetaDataManager(), new HideAllInversesObjectIDM(CollectionUtils.singleSet(Ifc2x3tc1Package.eINSTANCE), pluginManager.getMetaDataManager().getPackageMetaData("ifc2x3tc1")), model);
 
 			IfcProductDefinitionShape representation = (IfcProductDefinitionShape) picknick.getRepresentation();
 			IfcRepresentation surfaceModel = null;
@@ -127,7 +127,7 @@ public class AddFurniture {
 
 			SerializerPlugin serializerPlugin = pluginManager.getSerializerPlugin("org.bimserver.ifc.step.serializer.IfcStepSerializerPlugin", true);
 			Serializer serializer = serializerPlugin.createSerializer(null);
-			serializer.init(model, null, pluginManager, null, null, true);
+			serializer.init(model, null, pluginManager, null, true);
 			serializer.writeToFile(Paths.get("withfurn.ifc"), null);
 		} catch (PluginException e) {
 			e.printStackTrace();

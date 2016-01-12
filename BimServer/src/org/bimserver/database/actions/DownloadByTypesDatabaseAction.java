@@ -43,11 +43,11 @@ import org.bimserver.models.store.StorePackage;
 import org.bimserver.models.store.User;
 import org.bimserver.plugins.IfcModelSet;
 import org.bimserver.plugins.ModelHelper;
-import org.bimserver.plugins.PluginException;
 import org.bimserver.plugins.modelmerger.MergeException;
 import org.bimserver.plugins.objectidms.HideAllInversesObjectIDM;
 import org.bimserver.plugins.objectidms.ObjectIDM;
 import org.bimserver.plugins.objectidms.StructuralFeatureIdentifier;
+import org.bimserver.shared.exceptions.PluginException;
 import org.bimserver.shared.exceptions.UserException;
 import org.bimserver.utils.CollectionUtils;
 import org.bimserver.webservices.authorization.Authorization;
@@ -117,7 +117,7 @@ public class DownloadByTypesDatabaseAction extends AbstractDownloadDatabaseActio
 			for (ConcreteRevision concreteRevision : virtualRevision.getConcreteRevisions()) {
 				PackageMetaData packageMetaData = getBimServer().getMetaDataManager().getPackageMetaData(concreteRevision.getProject().getSchema());
 				try {
-					HideAllInversesObjectIDM hideAllInversesObjectIDM = new HideAllInversesObjectIDM(CollectionUtils.singleSet(Ifc2x3tc1Package.eINSTANCE), getBimServer().getPluginManager().requireSchemaDefinition(schema));
+					HideAllInversesObjectIDM hideAllInversesObjectIDM = new HideAllInversesObjectIDM(CollectionUtils.singleSet(Ifc2x3tc1Package.eINSTANCE), getBimServer().getPluginManager().getMetaDataManager().getPackageMetaData(schema));
 					
 					// This hack makes sure the JsonGeometrySerializer can look at the styles, probably more subtypes of getIfcRepresentationItem should be added (not ignored), also this code should not be here at all...
 					hideAllInversesObjectIDM.removeFromGeneralIgnoreSet(new StructuralFeatureIdentifier(Ifc2x3tc1Package.eINSTANCE.getIfcRepresentationItem().getName(), Ifc2x3tc1Package.eINSTANCE.getIfcRepresentationItem_StyledByItem().getName()));
@@ -136,8 +136,6 @@ public class DownloadByTypesDatabaseAction extends AbstractDownloadDatabaseActio
 					ifcModelSet.add(subModel);
 					
 					lastPackageMetaData = packageMetaData;
-				} catch (PluginException e) {
-					throw new UserException(e);
 				} catch (GeometryGeneratingException e) {
 					throw new UserException(e);
 				}
